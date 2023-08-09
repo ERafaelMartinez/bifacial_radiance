@@ -4578,22 +4578,22 @@ class AnalysisObj:
         
         if deepblusky and front_points is not None:
             linepts = front_points
-            print("front points: ", linepts)
+            # print("front points: ", linepts)
         else:
             linepts = self._linePtsMakeDict(frontscan)
         frontDict = self._irrPlot(octfile, linepts, name+'_Front',
                                     plotflag=plotflag, accuracy=accuracy)
-        print("frontDict: ", frontDict)
+        # print("frontDict: ", frontDict)
 
         #bottom view.
         if deepblusky and back_points is not None:
             linepts = back_points
-            print("back points: ", linepts)
+            # print("back points: ", linepts)
         else:
             linepts = self._linePtsMakeDict(backscan)
         backDict = self._irrPlot(octfile, linepts, name+'_Back',
                                    plotflag=plotflag, accuracy=accuracy)
-        print("backDict: ", backDict)
+        # print("backDict: ", backDict)
         
         # don't save if _irrPlot returns an empty file.
         if frontDict is not None:
