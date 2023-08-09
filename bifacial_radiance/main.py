@@ -2071,7 +2071,7 @@ class RadianceObj:
         return modulenames
     
     def makeScene(self, module=None, sceneDict=None, radname=None,
-                  moduletype=None):
+                  moduletype=None, single_module=False):
         """
         Create a SceneObj which contains details of the PV system configuration including
         tilt, row pitch, height, nMods per row, nRows in the system...
@@ -2137,8 +2137,11 @@ class RadianceObj:
         
         #self.nMods = sceneDict['nMods']
         #self.nRows = sceneDict['nRows']
-        sceneRAD = self.scene._makeSceneNxR(sceneDict=sceneDict,
-                                                 radname=radname)
+        if single_module:
+            sceneRAD = self.scene._makeSceneSingleModule(sceneDict=sceneDict, radname=radname)
+        else:
+            sceneRAD = self.scene._makeSceneNxR(sceneDict=sceneDict, radname=radname)
+
 
         if 'appendRadfile' not in sceneDict:
             appendRadfile = False
@@ -2846,6 +2849,73 @@ class SceneObj:
             self.name = 'Scene0'
         else:
             self.name = name
+
+    def _makeSceneSingleModule(self, modulename=None, sceneDict=None, radname=None):
+        """
+        Reimplement _makeSceneNxM method to use one single module and use an alternative origin on the module.
+        """
+        if modulename is None:
+            modulename = self.module.name
+
+        if sceneDict is None:
+            print('makeScene(modulename, sceneDict, nMods, nRows).  sceneDict'
+                  ' inputs: .tilt .azimuth .nMods .nRows' 
+                  ' AND .tilt or .gcr ; AND .hub_height or .clearance_height')
+
+
+        if 'azimuth' not in sceneDict:
+            sceneDict['azimuth'] = 180
+
+        if 'axis_tilt' not in sceneDict:
+            sceneDict['axis_tilt'] = 0
+
+        if 'originx' not in sceneDict:
+            sceneDict['originx'] = 0
+
+        if 'originy' not in sceneDict:
+            sceneDict['originy'] = 0
+
+        if radname is None:
+            radname =  str(self.module.name).strip().replace(' ', '_')
+
+        # loading variables
+        tilt = sceneDict['tilt']
+        azimuth = sceneDict['azimuth']
+        nMods = 1
+        nRows = 1
+        originx = sceneDict ['originx']
+        originy = sceneDict['originy']
+        clearance_height = sceneDict['clearance_height']
+
+
+        ''' INITIALIZE VARIABLES '''
+        text = "!xform "  # function that starts the transformation
+
+        text += f"-rx {tilt} "  # rotate about x-axis by tilt
+        
+        text += f"-rz {azimuth} "  # rotate about z-axis by azimuth
+
+        text += f" -t {originx} {originy} {clearance_height} "  # translate to origin
+        
+
+        filename = (f"{radname}.rad" )
+        
+        if self.hpc:
+            text += f'"{os.path.join(os.getcwd(), self.modulefile)}"' 
+            radfile = os.path.join(os.getcwd(), 'objects', filename) 
+        else:
+            text += os.path.join(self.modulefile)
+            radfile = os.path.join('objects',filename ) 
+
+        # py2 and 3 compatible: binary write, encode text first
+        with open(radfile, 'wb') as f:
+            f.write(text.encode('ascii'))
+
+        self.text = text
+        self.radfiles = radfile
+        self.sceneDict = sceneDict
+#        self.hub_height = hubheight
+        return radfile
 
     def _makeSceneNxR(self, modulename=None, sceneDict=None, radname=None):
         """
