@@ -51,6 +51,7 @@ Overview:
 
 """
 import logging
+from typing import List, Literal
 logging.basicConfig()
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
@@ -3994,7 +3995,26 @@ class AnalysisObj:
                       columns = ['x','y','z', 'mattype','Wm2'], index = False)
 
         print('Saved: %s'%(savefile))
-        return (savefile)   
+        return (savefile)
+
+    def singleModuleAnalysis(self, scene, sensorsy=9, sensorsx=1,
+                             frontsurfaceoffset=0.001, backsurfaceoffset=0.001,
+                             modscanfront=None, modscanback=None, relative=False,
+                             debug=False):
+        
+        # load scene parameters from sceneDict
+        azimuth = scene.sceneDict["azimuth"]
+        tilt = scene.sceneDict["tilt"]
+        originx = scene.sceneDict["originx"]
+        originy = scene.sceneDict["originy"]
+        clearance_heigth = scene.sceneDict["clearance_height"]
+
+        # get module dimensions from module asociated with scene
+        length = scene.module.x
+        width = scene.module.y
+
+
+
 
     def moduleAnalysis(self, scene, modWanted=None, rowWanted=None,
                        sensorsy=9, sensorsx=1, 
@@ -4412,8 +4432,112 @@ class AnalysisObj:
             #allfront.append(front)
         return df_row
 
-    def analysis(self, octfile, name, frontscan, backscan,
-                 plotflag=False, accuracy='low', RGB=False):
+    def configureSensors(self, scene: SceneObj, sensorsx=10, sensorsy=10,
+                         frontsurfaceoffset: float = None,
+                         backsurfaceoffset: float = None):
+        """
+        Configure the sensors for the module on the scene
+        """
+        import numpy as np
+        from typing import List, Literal
+
+        def rotate(points: np.array, angle_deg: float,
+                   axis: Literal["x", "y", "z"]) -> np.array:
+            if axis == "x":
+                rotation_matrix = np.array([[1, 0, 0],
+                                            [0, np.cos(angle_deg), -np.sin(angle_deg)],
+                                            [0, np.sin(angle_deg), np.cos(angle_deg)]])
+            elif axis == "y":
+                rotation_matrix = np.array([[np.cos(angle_deg), 0, np.sin(angle_deg)],
+                                            [0, 1, 0],
+                                            [-np.sin(angle_deg), 0, np.cos(angle_deg)]])
+            elif axis == "z":
+                rotation_matrix = np.array([[np.cos(angle_deg), -np.sin(angle_deg), 0],
+                                            [np.sin(angle_deg), np.cos(angle_deg), 0],
+                                            [0, 0, 1]])
+            else:
+                raise ValueError("Invalid axis")
+            
+            new_points: List[np.array] = []
+            for point in points:
+                point = np.dot(rotation_matrix, point)
+                new_points.append(point)
+            return np.array(new_points)
+
+        def translate(points: np.array, shift_x: float = 0.0, shift_y: float = 0.0,
+                      shift_z: float = 0.0) -> np.array:
+            new_object_points: List[np.array] = []
+            for point in points:
+                point = point + np.array([shift_x, shift_y, shift_z])
+                new_object_points.append(point)
+            return np.array(new_object_points)
+
+        # define a set of points in 3d space based on the following parameters:
+        npoints_x = sensorsx
+        npoints_y = sensorsy
+        npoints_z = 1
+
+        xmax = scene.module.x
+        ymax = scene.module.y
+        zmax = scene.module.z
+
+        if frontsurfaceoffset:
+            zmax += frontsurfaceoffset
+            normal_vector = np.array([0, 0, -1])
+        elif backsurfaceoffset:
+            zmax -= backsurfaceoffset
+            normal_vector = np.array([0, 0, 1])
+        else:
+            raise ValueError("At least one of frontsurfaceoffset or backsurfaceoffset must be specified")
+
+        xmin = 0
+        ymin = 0
+        zmin = 0
+
+        dx = (xmax - xmin) / npoints_x
+        dy = (ymax - ymin) / npoints_y
+
+        x = np.arange(xmin, xmax, dx)
+        y = np.arange(ymin, ymax, dy)
+        z = np.array([zmin])
+
+        # points on the frame of reference of the module
+        points = np.array(np.meshgrid(x, y, z)).T.reshape(-1, 3)
+
+        # rotate the points around the x axis by the tilt angle
+        tilt = scene.sceneDict["tilt"]
+        points = rotate(points, angle_deg=tilt, axis="x")
+        normal_vector = rotate(np.array([normal_vector]), angle_deg=tilt, axis="x")[0]
+
+        # rotate the points around the z axis by the azimuth angle
+        azimuth = scene.sceneDict["azimuth"]
+        points = rotate(points, angle_deg=azimuth, axis="z")
+        normal_vector = rotate(np.array([normal_vector]), angle_deg=azimuth, axis="z")[0]
+
+        # translate the points to the origin of the scene
+        points = translate(
+            points,
+            shift_x=scene.sceneDict["originx"],
+            shift_y=scene.sceneDict["originy"],
+            shift_z=scene.sceneDict["clearance_height"] + zmax
+            )
+        
+        # write the points to a string for its further use
+        linepts = ""
+        for point in points:
+            xpos = point[0]
+            ypos = point[1]
+            zpos = point[2]
+            vx = normal_vector[0]
+            vy = normal_vector[1]
+            vz = normal_vector[2]
+            linepts += f"{xpos} {ypos} {zpos} {vx} {vy} {vz} \r"
+
+        return linepts
+
+    def analysis(self, octfile, name, frontscan=None, backscan=None,
+                 plotflag=False, accuracy='low', RGB=False,
+                 deepblusky=False, front_points=None, back_points=None):
         """
         General analysis function, where linepts are passed in for calling the
         raytrace routine :py:class:`~bifacial_radiance.AnalysisObj._irrPlot` 
@@ -4451,14 +4575,26 @@ class AnalysisObj:
         if octfile is None:
             print('Analysis aborted - no octfile \n')
             return None, None
-        linepts = self._linePtsMakeDict(frontscan)
+        
+        if deepblusky and front_points is not None:
+            linepts = front_points
+            print("front points: ", linepts)
+        else:
+            linepts = self._linePtsMakeDict(frontscan)
         frontDict = self._irrPlot(octfile, linepts, name+'_Front',
                                     plotflag=plotflag, accuracy=accuracy)
+        print("frontDict: ", frontDict)
 
         #bottom view.
-        linepts = self._linePtsMakeDict(backscan)
+        if deepblusky and back_points is not None:
+            linepts = back_points
+            print("back points: ", linepts)
+        else:
+            linepts = self._linePtsMakeDict(backscan)
         backDict = self._irrPlot(octfile, linepts, name+'_Back',
                                    plotflag=plotflag, accuracy=accuracy)
+        print("backDict: ", backDict)
+        
         # don't save if _irrPlot returns an empty file.
         if frontDict is not None:
             if len(frontDict['Wm2']) != len(backDict['Wm2']):
@@ -4471,6 +4607,7 @@ class AnalysisObj:
                 self._saveResults(frontDict, backDict,'irr_%s.csv'%(name), RGB=RGB)
 
         return frontDict, backDict
+
 
 
 def quickExample(testfolder=None):
@@ -4510,7 +4647,7 @@ def quickExample(testfolder=None):
     moduletype = 'test-module'
     module = demo.makeModule(name=moduletype, x=1.59, y=0.95)
     sceneDict = {'tilt':10,'pitch':1.5,'clearance_height':0.2,
-                 'azimuth':180, 'nMods': 10, 'nRows': 3}
+                'azimuth':180, 'nMods': 10, 'nRows': 3}
     #makeScene creates a .rad file with 10 modules per row, 3 rows.
     scene = demo.makeScene(module=module, sceneDict=sceneDict)
     # makeOct combines all of the ground, sky and object files into .oct file.
