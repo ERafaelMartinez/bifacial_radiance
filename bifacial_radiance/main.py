@@ -4439,21 +4439,21 @@ class AnalysisObj:
         Configure the sensors for the module on the scene
         """
         import numpy as np
-        from typing import List, Literal
+        from typing import Literal, List
 
-        def rotate(points: np.array, angle_deg: float,
+        def rotate(points: np.array, angle: float,
                    axis: Literal["x", "y", "z"]) -> np.array:
             if axis == "x":
                 rotation_matrix = np.array([[1, 0, 0],
-                                            [0, np.cos(angle_deg), -np.sin(angle_deg)],
-                                            [0, np.sin(angle_deg), np.cos(angle_deg)]])
+                                            [0, np.cos(angle), -np.sin(angle)],
+                                            [0, np.sin(angle), np.cos(angle)]])
             elif axis == "y":
-                rotation_matrix = np.array([[np.cos(angle_deg), 0, np.sin(angle_deg)],
+                rotation_matrix = np.array([[np.cos(angle), 0, np.sin(angle)],
                                             [0, 1, 0],
-                                            [-np.sin(angle_deg), 0, np.cos(angle_deg)]])
+                                            [-np.sin(angle), 0, np.cos(angle)]])
             elif axis == "z":
-                rotation_matrix = np.array([[np.cos(angle_deg), -np.sin(angle_deg), 0],
-                                            [np.sin(angle_deg), np.cos(angle_deg), 0],
+                rotation_matrix = np.array([[np.cos(angle), -np.sin(angle), 0],
+                                            [np.sin(angle), np.cos(angle), 0],
                                             [0, 0, 1]])
             else:
                 raise ValueError("Invalid axis")
@@ -4494,11 +4494,11 @@ class AnalysisObj:
         ymin = 0
         zmin = 0
 
-        dx = (xmax - xmin) / npoints_x
-        dy = (ymax - ymin) / npoints_y
+        dx = (xmax - xmin) / (npoints_x)
+        dy = (ymax - ymin) / (npoints_y)
 
-        x = np.arange(xmin, xmax, dx)
-        y = np.arange(ymin, ymax, dy)
+        x = np.arange(xmin, xmax + dx, dx)
+        y = np.arange(ymin, ymax + dy, dy)
         z = np.array([zmin])
 
         # points on the frame of reference of the module
@@ -4506,13 +4506,13 @@ class AnalysisObj:
 
         # rotate the points around the x axis by the tilt angle
         tilt = scene.sceneDict["tilt"]
-        points = rotate(points, angle_deg=tilt, axis="x")
-        normal_vector = rotate(np.array([normal_vector]), angle_deg=tilt, axis="x")[0]
+        points = rotate(points, angle=np.deg2rad(tilt), axis="x")
+        normal_vector = rotate(np.array([normal_vector]), angle=np.deg2rad(tilt), axis="x")[0]
 
         # rotate the points around the z axis by the azimuth angle
         azimuth = scene.sceneDict["azimuth"]
-        points = rotate(points, angle_deg=azimuth, axis="z")
-        normal_vector = rotate(np.array([normal_vector]), angle_deg=azimuth, axis="z")[0]
+        points = rotate(points, angle=np.deg2rad(azimuth), axis="z")
+        normal_vector = rotate(np.array([normal_vector]), angle=np.deg2rad(azimuth), axis="z")[0]
 
         # translate the points to the origin of the scene
         points = translate(
