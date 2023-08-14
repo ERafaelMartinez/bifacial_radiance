@@ -4475,7 +4475,6 @@ class AnalysisObj:
         # define a set of points in 3d space based on the following parameters:
         npoints_x = sensorsx
         npoints_y = sensorsy
-        npoints_z = 1
 
         xmax = scene.module.x
         ymax = scene.module.y
@@ -4485,20 +4484,20 @@ class AnalysisObj:
             zmax += frontsurfaceoffset
             normal_vector = np.array([0, 0, -1])
         elif backsurfaceoffset:
-            zmax -= backsurfaceoffset
+            zmax = -zmax - backsurfaceoffset
             normal_vector = np.array([0, 0, 1])
         else:
             raise ValueError("At least one of frontsurfaceoffset or backsurfaceoffset must be specified")
 
         xmin = 0
         ymin = 0
-        zmin = 0
+        zmin = zmax
 
-        dx = (xmax - xmin) / (npoints_x)
-        dy = (ymax - ymin) / (npoints_y)
+        dx = (xmax - xmin) / (npoints_x + 1)
+        dy = (ymax - ymin) / (npoints_y + 1)
 
-        x = np.arange(xmin, xmax + dx, dx)
-        y = np.arange(ymin, ymax + dy, dy)
+        x = np.arange(dx, xmax, dx)
+        y = np.arange(dy, ymax, dy)
         z = np.array([zmin])
 
         # points on the frame of reference of the module
@@ -4519,7 +4518,7 @@ class AnalysisObj:
             points,
             shift_x=scene.sceneDict["originx"],
             shift_y=scene.sceneDict["originy"],
-            shift_z=scene.sceneDict["clearance_height"] + zmax
+            shift_z=scene.sceneDict["clearance_height"]
             )
         
         # write the points to a string for its further use
