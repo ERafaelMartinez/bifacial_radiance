@@ -147,7 +147,7 @@ def _interactive_directory(title=None):
 
 def _modDict(originaldict, moddict, relative=False):
     '''
-    Compares keys in originaldict with moddict and updates values of 
+    Compares keys in originaldict with moddict and updates values of
     originaldict to moddict if existing.
 
     Parameters
@@ -2066,7 +2066,7 @@ class RadianceObj:
         return modulenames
 
     def makeScene(self, module=None, sceneDict=None, radname=None,
-                  moduletype=None, single_module=False, orientation_deg=None):
+                  moduletype=None, single_module=False, orientation_deg=None, overwrite_radfile=False):
         """
         Create a SceneObj which contains details of the PV system configuration including
         tilt, row pitch, height, nMods per row, nRows in the system...
@@ -2134,7 +2134,8 @@ class RadianceObj:
         # self.nRows = sceneDict['nRows']
         if single_module:
             sceneRAD = self.scene._makeSceneSingleModule(sceneDict=sceneDict, radname=radname,
-                                                         orientation_deg=orientation_deg)
+                                                         orientation_deg=orientation_deg,
+                                                         overwrite_radfile=overwrite_radfile)
         else:
             sceneRAD = self.scene._makeSceneNxR(sceneDict=sceneDict, radname=radname)
 
@@ -2146,9 +2147,11 @@ class RadianceObj:
         if appendRadfile:
             debug = False
             try:
-                self.radfiles.append(sceneRAD)
-                if debug:
-                    print("Radfile APPENDED!")
+                # check if the sceneRAD string is already in the radfiles list
+                if sceneRAD not in self.radfiles:
+                    self.radfiles.append(sceneRAD)
+                    if debug:
+                        print("Radfile APPENDED!")
             except:
                 # TODO: Manage situation where radfile was created with
                 # appendRadfile to False first..
@@ -2842,7 +2845,8 @@ class SceneObj:
         else:
             self.name = name
 
-    def _makeSceneSingleModule(self, modulename=None, sceneDict=None, radname=None, orientation_deg=None):
+    def _makeSceneSingleModule(self, modulename=None, sceneDict=None, radname=None, orientation_deg=None,
+                               overwrite_radfile=False):
         """
         Reimplement _makeSceneNxM method to use one single module and use an alternative origin on the module.
         """
@@ -2900,8 +2904,13 @@ class SceneObj:
             radfile = os.path.join('objects', filename)
 
             # py2 and 3 compatible: binary write, encode text first
-        with open(radfile, 'wb') as f:
-            f.write(text.encode('ascii'))
+        if overwrite_radfile:
+            with open(radfile, 'wb') as f:
+                f.write(text.encode('ascii'))
+        else:
+            with open(radfile, 'ab') as f:
+                text = '\n' + text
+                f.write(text.encode('ascii'))
 
         self.text = text
         self.radfiles = radfile
@@ -3837,7 +3846,7 @@ class AnalysisObj:
 
         if accuracy == 'low':
             # rtrace optimized for faster scans: (ab2, others 96 is too coarse)
-            cmd = "rtrace -i -ab 2 -aa .1 -ar 256 -ad 2048 -as 256 -h -oovs " + octfile
+            cmd = "rtrace -i -ab 3 -aa .1 -ar 256 -ad 2048 -as 256 -h -oovs " + octfile
         elif accuracy == 'high':
             # rtrace ambient values set for 'very accurate':
             cmd = "rtrace -i -ab 5 -aa .08 -ar 512 -ad 2048 -as 512 -h -oovs " + octfile
