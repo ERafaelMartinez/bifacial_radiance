@@ -944,7 +944,7 @@ class RadianceObj:
 
         if resample is not None:
             metdata.drop(columns=["data_source_unct"], inplace=True)
-            metdata = metdata.resample(resample).mean()
+            metdata = metdata.resample(resample).mean()  # .interpolate(method="linear")
 
         metdata, metadata = _tz_convert(metdata, metadata, tz_convert_val)
 
@@ -2074,7 +2074,7 @@ class RadianceObj:
         print('Available module names: {}'.format([str(x) for x in modulenames]))
         return modulenames
 
-    def makeScene(self, module=None, sceneDict=None, radname=None,
+    def makeScene(self, module=None, sceneDict=None, radname=None, empty=False,
                   moduletype=None, single_module=False, orientation_deg=None, overwrite_radfile=False):
         """
         Create a SceneObj which contains details of the PV system configuration including
@@ -2118,9 +2118,12 @@ class RadianceObj:
         self.scene.hpc = self.hpc  # pass HPC mode from parent
 
         if sceneDict is None:
-            print('makeScene(moduletype, sceneDict, nMods, nRows).  ' + \
-                  'sceneDict inputs: .tilt .clearance_height .pitch .azimuth')
-            return self.scene
+            if not empty:
+                print('makeScene(moduletype, sceneDict, nMods, nRows).  ' + \
+                      'sceneDict inputs: .tilt .clearance_height .pitch .azimuth')
+                return self.scene
+            else:
+                sceneDict = {}
 
         if 'azimuth' not in sceneDict:
             sceneDict['azimuth'] = 180
@@ -2135,9 +2138,10 @@ class RadianceObj:
         # Preferred: clearance_height,
         # If only height is passed, it is assumed to be clearance_height.
 
-        sceneDict, use_clearanceheight = _heightCasesSwitcher(sceneDict,
-                                                              preferred='clearance_height',
-                                                              nonpreferred='hub_height')
+        if not empty:
+            sceneDict, use_clearanceheight = _heightCasesSwitcher(sceneDict,
+                                                                  preferred='clearance_height',
+                                                                  nonpreferred='hub_height')
 
         # self.nMods = sceneDict['nMods']
         # self.nRows = sceneDict['nRows']
@@ -2145,6 +2149,8 @@ class RadianceObj:
             sceneRAD = self.scene._makeSceneSingleModule(sceneDict=sceneDict, radname=radname,
                                                          orientation_deg=orientation_deg,
                                                          overwrite_radfile=overwrite_radfile)
+        elif empty:
+            sceneRAD = self.scene._makeEmptyScene(radname=radname, overwrite_radfile=overwrite_radfile)
         else:
             sceneRAD = self.scene._makeSceneNxR(sceneDict=sceneDict, radname=radname)
 
@@ -2853,6 +2859,27 @@ class SceneObj:
             self.name = 'Scene0'
         else:
             self.name = name
+
+    def _makeEmptyScene(self, radname=None, overwrite_radfile=False):
+        if radname is None:
+            radname = "empty_scene"
+
+        filename = (f"{radname}.rad")
+        radfile = os.path.join('objects', filename)
+        text = ""
+
+        if overwrite_radfile:
+            with open(radfile, 'wb') as f:
+                f.write(text.encode('ascii'))
+        else:
+            with open(radfile, 'ab') as f:
+                text = '\n' + text
+                f.write(text.encode('ascii'))
+
+        self.text = text
+        self.radfiles = radfile
+
+        return radfile
 
     def _makeSceneSingleModule(self, modulename=None, sceneDict=None, radname=None, orientation_deg=None,
                                overwrite_radfile=False):
