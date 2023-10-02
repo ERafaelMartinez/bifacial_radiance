@@ -796,7 +796,8 @@ class RadianceObj:
 
     def readWeatherFile(self, weatherFile=None, starttime=None,
                         endtime=None, label=None, source=None,
-                        coerce_year=None, tz_convert_val=None):
+                        coerce_year=None, tz_convert_val=None,
+                        resample: str | None = None):
         """
         Read either a EPW or a TMY file, calls the functions
         :py:class:`~bifacial_radiance.readTMY` or
@@ -936,12 +937,17 @@ class RadianceObj:
             metdata, metadata = self._readSOLARGIS(weatherFile, label=label)
 
         if source.lower() == 'epw':
-            metdata, metadata = self._readEPW(weatherFile, label=label)
+            metdata, metadata = self._readEPW(weatherFile, label=label, coerce_year=coerce_year)
 
         if source.lower() == 'tmy3':
             metdata, metadata = self._readTMY(weatherFile, label=label)
 
+        if resample is not None:
+            metdata.drop(columns=["data_source_unct"], inplace=True)
+            metdata = metdata.resample(resample).mean()
+
         metdata, metadata = _tz_convert(metdata, metadata, tz_convert_val)
+
         tzinfo = metdata.index.tzinfo
         tempMetDatatitle = 'metdata_temp.csv'
 
@@ -960,6 +966,9 @@ class RadianceObj:
                       "date(s)'s years. Setting Coerce year to None.")
                 coerce_year = None
         '''
+
+        if resample is not None:
+            metdata = metdata.interpolate(method="linear")
 
         tmydata_trunc = self._saveTempTMY(metdata, filename=tempMetDatatitle,
                                           starttime=starttime, endtime=endtime,
