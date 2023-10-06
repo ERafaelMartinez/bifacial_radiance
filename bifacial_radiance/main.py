@@ -1355,7 +1355,7 @@ class RadianceObj:
 
         return tracker_theta
 
-    def gendaylit(self, timeindex, metdata=None, debug=False):
+    def gendaylit(self, timeindex, visible_only: bool = False, metdata=None, debug=False):
         """
         Sets and returns sky information using gendaylit.
         Uses PVLIB for calculating the sun position angles instead of
@@ -1365,6 +1365,8 @@ class RadianceObj:
         ----------
         timeindex : int
             Index from 0 to ~4000 of the MetObj (daylight hours only)
+        visible_only : bool
+            Flag to set W to 0 (visible only) or 1 (full spectrum) in gendaylit light source
         metdata : ``MetObj``
             MetObj object with list of dni, dhi, ghi and location
         debug : bool
@@ -1438,6 +1440,10 @@ class RadianceObj:
                   '{}.  '.format(metdata.datetime[timeindex]) +
                   'Re-calculated elevation: {:0.2}'.format(sunalt))
 
+        W = 1  # default value for W (full spectrum) in gendaylit
+        if visible_only:
+            W = 0
+
         # Note - -W and -O1 option is used to create full spectrum analysis in units of Wm-2
         # " -L %s %s -g %s \n" %(dni/.0079, dhi/.0079, self.ground.ReflAvg) + \
         skyStr = ("# start of sky definition for daylighting studies\n" + \
@@ -1445,7 +1451,7 @@ class RadianceObj:
                   + " LON: " + str(lon) + " Elev: " + str(elev) + "\n"
                                                                   "# Sun position calculated w. PVLib\n" + \
                   "!gendaylit -ang %s %s" % (sunalt, sunaz)) + \
-                 " -W %s %s -g %s -O 1 \n" % (dni, dhi, ground.ReflAvg[groundindex]) + \
+                 " -W %s %s -g %s -O %s \n" % (dni, dhi, ground.ReflAvg[groundindex], W) + \
                  "skyfunc glow sky_mat\n0\n0\n4 1 1 1 0\n" + \
                  "\nsky_mat source sky\n0\n0\n4 0 0 1 180\n" + \
                  ground._makeGroundString(index=groundindex, cumulativesky=False)
