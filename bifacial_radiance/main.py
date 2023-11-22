@@ -78,13 +78,13 @@ def _findme(lst, a):  # find string match in a list. script from stackexchange
     return [i for i, x in enumerate(lst) if x == a]
 
 
-def _missingKeyWarning(dictype, missingkey, newvalue):  # prints warnings
+def _missingKeyWarning(dictype, missingkey, newvalue):  # # prints warnings
     if type(newvalue) is bool:
         valueunit = ''
     else:
         valueunit = 'm'
-    print("Warning: {} Dictionary Parameters passed, but {} is missing. ".format(dictype, missingkey))
-    print("Setting it to default value of {} {} to continue\n".format(newvalue, valueunit))
+    # print("Warning: {} Dictionary Parameters passed, but {} is missing. ".format(dictype, missingkey))
+    # print("Setting it to default value of {} {} to continue\n".format(newvalue, valueunit))
 
 
 def _normRGB(r, g, b):  # normalize by each color for human vision sensitivity
@@ -220,39 +220,39 @@ def _heightCasesSwitcher(sceneDict, preferred='hub_height', nonpreferred='cleara
     use_clearanceheight = False
     # CASES:
     if heightCases == '_height__':
-        print("sceneDict Warning: 'height' is being deprecated. " +
-              "Renaming as " + preferred)
+        # print("sceneDict Warning: 'height' is being deprecated. " +
+        # "Renaming as " + preferred)
         sceneDict[preferred] = sceneDict['height']
         del sceneDict['height']
 
     elif heightCases == '_clearance_height__':
-        # print("Using clearance_height.")
+        # # print("Using clearance_height.")
         use_clearanceheight = True
 
     elif heightCases == '_hub_height__':
-        # print("Using hub_height.'")
+        # # print("Using hub_height.'")
         pass
     elif heightCases == '_height__clearance_height__':
-        print("sceneDict Warning: 'clearance_height and 'height' " +
-              "(deprecated) are being passed. removing 'height' " +
-              "from sceneDict for this tracking routine")
+        # print("sceneDict Warning: 'clearance_height and 'height' " +
+        # "(deprecated) are being passed. removing 'height' " +
+        # "from sceneDict for this tracking routine")
         del sceneDict['height']
         use_clearanceheight = True
 
     elif heightCases == '_height__hub_height__':
-        print("sceneDict Warning: 'height' is being deprecated. Using 'hub_height'")
+        # print("sceneDict Warning: 'height' is being deprecated. Using 'hub_height'")
         del sceneDict['height']
 
     elif heightCases == '_height__clearance_height__hub_height__':
-        print("sceneDict Warning: 'hub_height', 'clearance_height'" +
-              ", and 'height' are being passed. Removing 'height'" +
-              " (deprecated) and " + nonpreferred + ", using " + preferred)
+        # print("sceneDict Warning: 'hub_height', 'clearance_height'" +
+        # ", and 'height' are being passed. Removing 'height'" +
+        # " (deprecated) and " + nonpreferred + ", using " + preferred)
         del sceneDict[nonpreferred]
 
     elif heightCases == '_clearance_height__hub_height__':
-        print("sceneDict Warning: 'hub_height' and 'clearance_height'" +
-              " are being passed. Using " + preferred +
-              " and removing " + nonpreferred)
+        # print("sceneDict Warning: 'hub_height' and 'clearance_height'" +
+        # " are being passed. Using " + preferred +
+        # " and removing " + nonpreferred)
         del sceneDict[nonpreferred]
 
     else:
@@ -289,12 +289,14 @@ def _subhourlydatatoGencumskyformat(gencumskydata, label='right'):
     gencumskydata.iloc[-1] = 0  # set last datapt to zero to forward fill w zeros
     # check if index exists. I'm sure there is a way to do this backwards.
     if any(gencumskydata.index.isin([padstart])):
-        print("Data starts on Jan. 01")
+        # print("Data starts on Jan. 01")
+        pass
     else:
         # gencumskydata=gencumskydata.append(pd.DataFrame(index=[padstart]))
         gencumskydata = pd.concat([gencumskydata, pd.DataFrame(index=[padstart])])
     if any(gencumskydata.index.isin([padend])):
-        print("Data ends on Dec. 31st")
+        # print("Data ends on Dec. 31st")
+        pass
     else:
         # gencumskydata=gencumskydata.append(pd.DataFrame(index=[padend]))
         gencumskydata = pd.concat([gencumskydata, pd.DataFrame(index=[padend])])
@@ -395,7 +397,7 @@ class RadianceObj:
         """
         self.path = os.path.abspath(path)
 
-        print('path = ' + path)
+        # print('path = ' + path)
         try:
             os.chdir(self.path)
         except OSError as exc:
@@ -407,7 +409,7 @@ class RadianceObj:
         def _checkPath(path):  # create the file structure if it doesn't exist
             if not os.path.exists(path):
                 os.makedirs(path)
-                print('Making path: ' + path)
+                # print('Making path: ' + path)
 
         _checkPath('images');
         _checkPath('objects')
@@ -420,7 +422,7 @@ class RadianceObj:
 
         if not os.path.exists('materials'):  # copy ground.rad to /materials
             os.makedirs('materials')
-            print('Making path: materials')
+            # print('Making path: materials')
 
             copy2(os.path.join(DATA_PATH, 'ground.rad'), 'materials')
         # if views directory doesn't exist, create it with two default views - side.vp and front.vp
@@ -460,7 +462,7 @@ class RadianceObj:
 
         with open(savefile, 'wb') as f:
             pickle.dump(self, f)
-        print('Saved to file {}'.format(savefile))
+        # print('Saved to file {}'.format(savefile))
 
     # def setHPC(self, hpc=True):
     #    self.hpc = hpc
@@ -530,7 +532,7 @@ class RadianceObj:
                 break
         if found:
             if rewrite:
-                print('Material exists, overwriting...\n')
+                # print('Material exists, overwriting...\n')
                 if comment is None:
                     pre = loc - 1
                 else:
@@ -553,7 +555,7 @@ class RadianceObj:
             else:
                 file_object.write("\n0\n0\n5 {} {} {} {} {}".format(Rrefl, Grefl, Brefl, specularity, roughness))
             file_object.close()
-            print('Added material {} to file {}'.format(material, material_file))
+            # print('Added material {} to file {}'.format(material, material_file))
         if (found and not rewrite):
             print('Material already exists\n')
 
@@ -691,7 +693,7 @@ class RadianceObj:
             try:
                 if self.metdata.albedo is not None:
                     material = self.metdata.albedo
-                    print(" Assigned Albedo from metdata.albedo")
+                    # print(" Assigned Albedo from metdata.albedo")
             except:
                 pass
 
@@ -764,9 +766,9 @@ class RadianceObj:
                 # py2 and 3 compatible: binary write, encode text first
                 with open(filename, 'wb') as f:
                     f.write(r.text.encode('ascii', 'ignore'))
-                print(' ... OK!')
+                # print(' ... OK!')
             else:
-                print(' connection error status code: %s' % (r.status_code))
+                # print(' connection error status code: %s' % (r.status_code))
                 r.raise_for_status()
 
         # Get the list of EPW filenames and lat/lon
@@ -777,7 +779,7 @@ class RadianceObj:
             url, name = _findClosestEPW(lat, lon, df)
 
             # download the EPW file to the local drive.
-            print('Getting weather file: ' + name)
+            # print('Getting weather file: ' + name)
             _downloadEPWfile(url, path_to_save, name)
             self.epwfile = os.path.join('EPWs', name)
 
@@ -785,11 +787,11 @@ class RadianceObj:
             if input('Downloading ALL EPW files available. OK? [y/n]') == 'y':
                 # get all of the EPW files
                 for index, row in df.iterrows():
-                    print('Getting weather file: ' + row['name'])
+                    # print('Getting weather file: ' + row['name'])
                     _downloadEPWfile(row['url'], path_to_save, row['name'])
             self.epwfile = None
         else:
-            print('Nothing returned. Proper usage: epwfile = getEPW(lat,lon)')
+            # print('Nothing returned. Proper usage: epwfile = getEPW(lat,lon)')
             self.epwfile = None
 
         return self.epwfile
@@ -826,7 +828,7 @@ class RadianceObj:
         source : str
             To help identify different types of .csv files. If None, it assumes
             it is a TMY3-style formated data. Current options: 'TMY3',
-            'solargis', 'EPW'
+            'solargis', 'EPW', 'PVGIS'
         coerce_year : int
             Year to coerce weather data to in YYYY format, ie 2021.
             If more than one year of data in the  weather file, year is NOT coerced.
@@ -925,8 +927,8 @@ class RadianceObj:
             if weatherFile[-3:].lower() == 'epw':
                 source = 'EPW'
             else:
-                print('Warning: CSV file passed for input. Assuming it is TMY3' +
-                      'style format')
+                # print('Warning: CSV file passed for input. Assuming it is TMY3' +
+                # 'style format')
                 source = 'TMY3'
             if label is None:
                 label = 'right'  # EPW and TMY are by deffault right-labeled.
@@ -936,6 +938,11 @@ class RadianceObj:
                 label = 'center'
             metdata, metadata = self._readSOLARGIS(weatherFile, label=label)
 
+        if source.lower() == 'pvgis':
+            if label is None:
+                label = 'center'
+            metdata, metadata = self._readPVGISTMY(weatherFile, label=label)
+
         if source.lower() == 'epw':
             metdata, metadata = self._readEPW(weatherFile, label=label, coerce_year=coerce_year)
 
@@ -943,7 +950,8 @@ class RadianceObj:
             metdata, metadata = self._readTMY(weatherFile, label=label)
 
         if resample is not None:
-            metdata.drop(columns=["data_source_unct"], inplace=True)
+            if "data_source_unct" in metdata.columns:
+                metdata.drop(columns=["data_source_unct"], inplace=True)
             metdata = metdata.resample(resample).mean()  # .interpolate(method="linear")
 
         metdata, metadata = _tz_convert(metdata, metadata, tz_convert_val)
@@ -962,7 +970,7 @@ class RadianceObj:
         #TODO: do we really need this check?
         if coerce_year is not None and starttime is not None:
             if coerce_year != starttime.year or coerce_year != endtime.year:
-                print("Warning: Coerce year does not match requested sampled "+
+                # print("Warning: Coerce year does not match requested sampled "+
                       "date(s)'s years. Setting Coerce year to None.")
                 coerce_year = None
         '''
@@ -1003,16 +1011,16 @@ class RadianceObj:
         gencumskydata = None
         gencumdict = None
         if len(tmydata) == 8760:
-            print("8760 line in WeatherFile. Assuming this is a standard hourly" +
-                  " WeatherFile for the year for purposes of saving Gencumulativesky" +
-                  " temporary weather files in EPW folder.")
+            # print("8760 line in WeatherFile. Assuming this is a standard hourly" +
+            # " WeatherFile for the year for purposes of saving Gencumulativesky" +
+            # " temporary weather files in EPW folder.")
             if coerce_year is None and starttime is not None:
                 coerce_year = starttime.year
             # SILVANA:  If user doesn't pass starttime, and doesn't select
             # coerce_year, then do we really need to coerce it?
             elif coerce_year is None:
                 coerce_year = 2021
-            print(f"Coercing year to {coerce_year}")
+            # print(f"Coercing year to {coerce_year}")
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 tmydata.index.values[:] = tmydata.index[:] + pd.DateOffset(year=(coerce_year))
@@ -1031,7 +1039,7 @@ class RadianceObj:
                     filterdates = (tmydata.index <= endtime)
 
             if filterdates is not None:
-                print("Filtering dates")
+                # print("Filtering dates")
                 tmydata[~filterdates] = 0
 
             gencumskydata = tmydata.copy()
@@ -1042,7 +1050,7 @@ class RadianceObj:
                     # TODO: check why subhourly data still has 0 entries on the next day on _readTMY3
                     # in the meantime, let's make Silvana's life easy by just deletig 0 entries
                     tmydata = tmydata[~(tmydata.index.hour == 0)]
-                    print(f"Coercing year to {coerce_year}")
+                    # print(f"Coercing year to {coerce_year}")
                     # TODO: this coercing shows a python warning. Turn it off or find another method? bleh.
                     tmydata.index.values[:] = tmydata.index[:] + pd.DateOffset(year=(coerce_year))
 
@@ -1057,7 +1065,7 @@ class RadianceObj:
                         filterdates = (tmydata.index <= endtime)
 
                 if filterdates is not None:
-                    print("Filtering dates")
+                    # print("Filtering dates")
                     tmydata[~filterdates] = 0
 
                 gencumskydata = tmydata.copy()
@@ -1089,7 +1097,7 @@ class RadianceObj:
                             filterdates = (tmydata.index <= endtime)
 
                     if filterdates is not None:
-                        print("Filtering dates")
+                        # print("Filtering dates")
                         tmydata = tmydata[filterdates]  # Reducing years potentially
 
                     # Checking if filtering reduced to just 1 year to do usual savin.
@@ -1112,8 +1120,11 @@ class RadianceObj:
         # Let's save files in EPWs folder for Gencumsky
         if gencumskydata is not None:
             csvfile = os.path.join('EPWs', filename)
-            print('Saving file {}, # points: {}'.format(csvfile, gencumskydata.__len__()))
-            gencumskydata.to_csv(csvfile, index=False, header=False, sep=' ', columns=['GHI', 'DHI'])
+            # print('Saving file {}, # points: {}'.format(csvfile, gencumskydata.__len__()))
+            cols = ['GHI']
+            if 'DHI' in gencumskydata.columns:
+                cols.append('DHI')
+            gencumskydata.to_csv(csvfile, index=False, header=False, sep=' ', columns=cols)
             self.gencumsky_metfile = csvfile
 
         if gencumdict is not None:
@@ -1122,8 +1133,11 @@ class RadianceObj:
                 gencumskydata = gencumdict[ii]
                 newfilename = filename.split('.')[0] + '_year_' + str(ii) + '.csv'
                 csvfile = os.path.join('EPWs', newfilename)
-                print('Saving file {}, # points: {}'.format(csvfile, gencumskydata.__len__()))
-                gencumskydata.to_csv(csvfile, index=False, header=False, sep=' ', columns=['GHI', 'DHI'])
+                # print('Saving file {}, # points: {}'.format(csvfile, gencumskydata.__len__()))
+                cols = ['GHI']
+                if 'DHI' in gencumskydata.columns:
+                    cols.append('DHI')
+                gencumskydata.to_csv(csvfile, index=False, header=False, sep=' ', columns=cols)
                 self.gencumsky_metfile.append(csvfile)
 
         return tmydata
@@ -1303,6 +1317,71 @@ class RadianceObj:
 
         return data, metadata
 
+    def _readPVGISTMY(self, filename=None, label='center'):
+        """
+        Read PVGIS TMY data file which is timestamped in UTC.
+        rename columns to match TMY3: DNI, DHI, GHI, DryBulb, Wspd
+        Timezone is always returned as UTC. Use tz_convert in readWeatherFile
+        to manually convert to local time
+
+        Parameters
+        ------------
+        filename : str
+            filename of the PVGIS TMY file.
+        label : str
+            'left', 'right', or 'center'. For data that is averaged, defines if
+            the timestamp refers to the left edge, the right edge, or the
+            center of the averaging interval. SolarGis default style is center,
+            unless user requests a right label.
+
+        """
+        # file format: the first 16 lines contian metadata
+        header = []
+        lat = None
+        lon = None
+        elev = None
+
+        with open(filename, 'r') as result:
+            for line in result:
+                if line.startswith('Latitude'):
+                    lat = line[28:]
+                if line.startswith('Longitude'):
+                    lon = line[29:]
+                if line.startswith('Elevation'):
+                    elev = line[15:]
+                if line.startswith('time'):
+                    break
+                header.append(line)
+            result.close()
+
+        metadata = {'latitude': float(lat),
+                    'longitude': float(lon),
+                    'altitude': float(elev)}
+        # read in remainder of data
+        data = pd.read_csv(filename, skiprows=header.__len__(), delimiter=',', decimal='.', )
+
+        # rename different field parameters to match output from
+        # pvlib.tmy.readtmy: DNI, DHI, DryBulb, Wspd
+        data.rename(columns={'G(h)': 'GHI',
+                             'Gb(n)': 'DNI',
+                             'Gd(h)': 'DHI',
+                             'T2m': 'DryBulb',
+                             'WS10m': 'Wspd',
+                             'RH': 'RH',
+                             'SP': 'SP',
+                             'IR(h)': 'IR',
+                             }, inplace=True)
+
+        # Generate index from Date (DD.HH.YYYY) and Time
+        data.index = pd.to_datetime(data["time(UTC)"],
+                                    dayfirst=True, utc=True,
+                                    infer_datetime_format=True)
+        # drop previous time column
+        data.drop(columns=["time(UTC)"], inplace=True)
+        # # print(data.columns, data.index, data, metadata)
+
+        return data, metadata
+
     def getSingleTimestampTrackerAngle(self, metdata, timeindex, gcr=None,
                                        azimuth=180, axis_tilt=0,
                                        limit_angle=45, backtrack=True):
@@ -1370,7 +1449,7 @@ class RadianceObj:
         metdata : ``MetObj``
             MetObj object with list of dni, dhi, ghi and location
         debug : bool
-            Flag to print output of sky DHI and DNI
+            Flag to # print output of sky DHI and DNI
 
         Returns
         -------
@@ -1385,8 +1464,8 @@ class RadianceObj:
             try:
                 metdata = self.metdata
             except:
-                print('usage: pass metdata, or run after running ' +
-                      'readWeatherfile() ')
+                # print('usage: pass metdata, or run after running ' +
+                # 'readWeatherfile() ')
                 return
 
         ground = self.ground
@@ -1409,12 +1488,13 @@ class RadianceObj:
                 warnings.warn("Shape of ground Albedos and TMY data do not match.")
                 return
         except:
-            print('usage: make sure to run setGround() before gendaylit()')
+            # print('usage: make sure to run setGround() before gendaylit()')
             return
 
         if debug is True:
-            print('Sky generated with Gendaylit, with DNI: %0.1f, DHI: %0.1f' % (dni, dhi))
-            print("Datetime TimeIndex", metdata.datetime[timeindex])
+            # print('Sky generated with Gendaylit, with DNI: %0.1f, DHI: %0.1f' % (dni, dhi))
+            # print("Datetime TimeIndex", metdata.datetime[timeindex])
+            pass
 
         # Time conversion to correct format and offset.
         # datetime = metdata.sunrisesetdata['corrected_timestamp'][timeindex]
@@ -1436,9 +1516,9 @@ class RadianceObj:
         if sunalt <= 0:
             sunalt = np.arcsin(
                 (ghi - dhi) / (dni + .001)) * 180 / np.pi  # reverse engineer elevation from ghi, dhi, dni
-            print('Warning: negative sun elevation at ' +
-                  '{}.  '.format(metdata.datetime[timeindex]) +
-                  'Re-calculated elevation: {:0.2}'.format(sunalt))
+            # print('Warning: negative sun elevation at ' +
+            # '{}.  '.format(metdata.datetime[timeindex]) +
+            # 'Re-calculated elevation: {:0.2}'.format(sunalt))
 
         W = 1  # default value for W (full spectrum) in gendaylit
         if visible_only:
@@ -1497,7 +1577,7 @@ class RadianceObj:
            Filename of sky in /skies/ directory
         """
 
-        print('Sky generated with Gendaylit 2 MANUAL, with DNI: %0.1f, DHI: %0.1f' % (dni, dhi))
+        # print('Sky generated with Gendaylit 2 MANUAL, with DNI: %0.1f, DHI: %0.1f' % (dni, dhi))
 
         sky_path = 'skies'
 
@@ -1510,11 +1590,11 @@ class RadianceObj:
             if self.ground.ReflAvg.shape[0] == 1:  # just 1 entry
                 groundindex = 0
             else:
-                print("Ambiguous albedo entry, Set albedo to single value "
-                      "in setGround()")
+                # print("Ambiguous albedo entry, Set albedo to single value "
+                # "in setGround()")
                 return
         except:
-            print('usage: make sure to run setGround() before gendaylit()')
+            # print('usage: make sure to run setGround() before gendaylit()')
             return
 
         # Note: -W and -O1 are used to create full spectrum analysis in units of Wm-2
@@ -1577,14 +1657,15 @@ class RadianceObj:
         if gencumsky_metfile is None:
             gencumsky_metfile = self.gencumsky_metfile
             if isinstance(gencumsky_metfile, str):
-                print("Loaded ", gencumsky_metfile)
+                # print("Loaded ", gencumsky_metfile)
+                pass
 
         if isinstance(gencumsky_metfile, list):
-            print("There are more than 1 year of gencumsky temporal weather file saved." +
-                  "You can pass which file you want with gencumsky_metfile input. Since " +
-                  "No year was selected, defaulting to using the first year of the list")
+            # print("There are more than 1 year of gencumsky temporal weather file saved." +
+            # "You can pass which file you want with gencumsky_metfile input. Since " +
+            # "No year was selected, defaulting to using the first year of the list")
             gencumsky_metfile = gencumsky_metfile[0]
-            print("Loaded ", gencumsky_metfile)
+            # print("Loaded ", gencumsky_metfile)
 
         if savefile is None:
             savefile = "cumulative"
@@ -1775,9 +1856,9 @@ class RadianceObj:
                 print('No trackerdict value passed or available in self')
 
         if startdate is not None or enddate is not None:
-            print("Deprecation Warning: gendyalit1axis no longer downselects" +
-                  " entries by stardate and enddate. Downselect your data" +
-                  " when loading with readWeatherFile")
+            # print("Deprecation Warning: gendyalit1axis no longer downselects" +
+            # " entries by stardate and enddate. Downselect your data" +
+            # " when loading with readWeatherFile")
             return
 
         try:
@@ -1786,7 +1867,8 @@ class RadianceObj:
             print("metdata.tracker_theta doesn't exist. Run RadianceObj.set1axis() first")
 
         if debug is False:
-            print('Creating ~%d skyfiles. ' % (len(trackerdict.keys())))
+            # print('Creating ~%d skyfiles. ' % (len(trackerdict.keys())))
+            pass
         count = 0  # counter to get number of skyfiles created, just for giggles
 
         trackerdict2 = {}
@@ -1808,7 +1890,7 @@ class RadianceObj:
                 trackerdict2[filename]['skyfile'] = skyfile
                 count += 1
 
-        print('Created {} skyfiles in /skies/'.format(count))
+        # print('Created {} skyfiles in /skies/'.format(count))
         self.trackerdict = trackerdict2
         return trackerdict2
 
@@ -1845,7 +1927,7 @@ class RadianceObj:
             savefile = '1axis_%s' % (theta)  # prefix for .cal file and skies\*.rad file
             skyfile = self.genCumSky(gencumsky_metfile=csvfile, savefile=savefile)
             trackerdict[theta]['skyfile'] = skyfile
-            print('Created skyfile %s' % (skyfile))
+            # print('Created skyfile %s' % (skyfile))
         # delete default skyfile (not strictly necessary)
         self.skyfiles = None
         self.trackerdict = trackerdict
@@ -1885,9 +1967,10 @@ class RadianceObj:
             time_counter = 0
             for file in filelist:
                 if debug:
-                    print("HPC Checking for file %s" % (file))
+                    pass
+                    # print("HPC Checking for file %s" % (file))
                 if None in filelist:  # are we missing any files? abort!
-                    print('Missing files, skipping...')
+                    # print('Missing files, skipping...')
                     self.octfile = None
                     return None
                 # Filesky is being saved as 'none', so it crashes !
@@ -1895,12 +1978,12 @@ class RadianceObj:
                     time.sleep(1)
                     time_counter += 1
                 if time_counter > time_to_wait:
-                    print("filenotfound")
+                    # print("filenotfound")
                     break
 
         # os.system('oconv '+ ' '.join(filelist) + ' > %s.oct' % (octname))
         if None in filelist:  # are we missing any files? abort!
-            print('Missing files, skipping...')
+            # print('Missing files, skipping...')
             self.octfile = None
             return None
 
@@ -1918,7 +2001,7 @@ class RadianceObj:
         # use rvu to see if everything looks good.
         # use cmd for this since it locks out the terminal.
         # 'rvu -vf views\side.vp -e .01 monopanel_test.oct'
-        print("Created %s.oct" % (octname))
+        # print("Created %s.oct" % (octname))
         self.octfile = '%s.oct' % (octname)
         return '%s.oct' % (octname)
 
@@ -1955,7 +2038,7 @@ class RadianceObj:
         else:  # just loop through one single index in tracker dictionary
             indexlist = [singleindex]
 
-        print('\nMaking {} octfiles in root directory.'.format(indexlist.__len__()))
+        # print('\nMaking {} octfiles in root directory.'.format(indexlist.__len__()))
         for index in sorted(indexlist):  # run through either entire key list of trackerdict, or just a single value
             try:
                 filelist = self.materialfiles + [trackerdict[index]['skyfile'], trackerdict[index]['radfile']]
@@ -1977,28 +2060,28 @@ class RadianceObj:
         from bifacial_radiance import ModuleObj
 
         if name is None:
-            print("usage:  makeModule(name,x,y,z, modulefile = '\objects\*.rad', " +
-                  " zgap = 0.1 (module offset)" +
-                  "numpanels = 1 (# of panels in portrait), ygap = 0.05 " +
-                  "(slope distance between panels when arrayed), " +
-                  "rewriteModulefile = True (or False), bifi = 1")
-            print("You can also override module_type info by passing 'text'" +
-                  "variable, or add on at the end for racking details with " +
-                  "'customtext'. See function definition for more details")
-            print("Optional: tubeParams={} (torque tube details including "
-                  "diameter (torque tube dia. in meters), tubetype='Round' "
-                  "(or 'square', 'hex'), material='Metal_Grey' (or 'black')"
-                  ", axisofrotation=True (does scene rotate around tube)")
-            print("Optional: cellModule={} (create cell-level module by " +
-                  " passing in dictionary with keys 'numcellsx'6 (#cells in " +
-                  "X-dir.), 'numcellsy', 'xcell' (cell size in X-dir. in meters)," +
-                  "'ycell', 'xcellgap' (spacing between cells in X-dir.), 'ycellgap'")
-            print("Optional: omegaParams={} (create the support structure omega by " +
-                  "passing in dictionary with keys 'omega_material' (the material of " +
-                  "omega), 'mod_overlap'(the length of the module adjacent piece of" +
-                  " omega that overlaps with the module),'x_omega1', 'y_omega' (ideally same" +
-                  " for all the parts of omega),'z_omega1', 'x_omega2' (X-dir length of the" +
-                  " vertical piece), 'x_omega3', z_omega3")
+            # # print("usage:  makeModule(name,x,y,z, modulefile = '\objects\*.rad', " +
+            #       " zgap = 0.1 (module offset)" +
+            #       "numpanels = 1 (# of panels in portrait), ygap = 0.05 " +
+            #       "(slope distance between panels when arrayed), " +
+            #       "rewriteModulefile = True (or False), bifi = 1")
+            # # print("You can also override module_type info by passing 'text'" +
+            #       "variable, or add on at the end for racking details with " +
+            #       "'customtext'. See function definition for more details")
+            # # print("Optional: tubeParams={} (torque tube details including "
+            #       "diameter (torque tube dia. in meters), tubetype='Round' "
+            #       "(or 'square', 'hex'), material='Metal_Grey' (or 'black')"
+            #       ", axisofrotation=True (does scene rotate around tube)")
+            # # print("Optional: cellModule={} (create cell-level module by " +
+            #       " passing in dictionary with keys 'numcellsx'6 (#cells in " +
+            #       "X-dir.), 'numcellsy', 'xcell' (cell size in X-dir. in meters)," +
+            #       "'ycell', 'xcellgap' (spacing between cells in X-dir.), 'ycellgap'")
+            # # print("Optional: omegaParams={} (create the support structure omega by " +
+            #       "passing in dictionary with keys 'omega_material' (the material of " +
+            #       "omega), 'mod_overlap'(the length of the module adjacent piece of" +
+            #       " omega that overlaps with the module),'x_omega1', 'y_omega' (ideally same" +
+            #       " for all the parts of omega),'z_omega1', 'x_omega2' (X-dir length of the" +
+            #       " vertical piece), 'x_omega3', z_omega3")
 
             return
 
@@ -2012,9 +2095,9 @@ class RadianceObj:
             tubeParams = None
         if 'torquetube' in kwargs:
             torquetube = kwargs.pop('torquetube')
-            print("\nWarning: boolean input `torquetube` passed into makeModule"
-                  ". Starting in v0.4.0 this boolean parameter is deprecated."
-                  " Use module.addTorquetube() with `visible` parameter instead.")
+            # # print("\nWarning: boolean input `torquetube` passed into makeModule"
+            #       ". Starting in v0.4.0 this boolean parameter is deprecated."
+            #       " Use module.addTorquetube() with `visible` parameter instead.")
             if tubeParams:
                 tubeParams['visible'] = torquetube
             elif (tubeParams is None) & (torquetube is True):
@@ -2022,10 +2105,10 @@ class RadianceObj:
 
         if 'axisofrotationTorqueTube' in kwargs:
             axisofrotation = kwargs.pop('axisofrotationTorqueTube')
-            print("\nWarning: input boolean `axisofrotationTorqueTube` passed "
-                  "into makeModule. Starting in v0.4.0 this boolean parameter is"
-                  " deprecated. Use module.addTorquetube() with `axisofrotation`"
-                  "parameter instead.")
+            # # print("\nWarning: input boolean `axisofrotationTorqueTube` passed "
+            #       "into makeModule. Starting in v0.4.0 this boolean parameter is"
+            #       " deprecated. Use module.addTorquetube() with `axisofrotation`"
+            #       "parameter instead.")
             if tubeParams:  # this kwarg only does somehting if there's a TT.
                 tubeParams['axisofrotation'] = axisofrotation
 
@@ -2069,12 +2152,12 @@ class RadianceObj:
         with open(customradfile, 'wb') as f:
             f.write(text.encode('ascii'))
 
-        print("\nCustom Object Name", customradfile)
+        # print("\nCustom Object Name", customradfile)
         self.customradfile = customradfile
         return customradfile
 
     def printModules(self):
-        # print available module types from ModuleObj
+        # # print available module types from ModuleObj
         from bifacial_radiance import ModuleObj
         modulenames = ModuleObj().readModule()
         print('Available module names: {}'.format([str(x) for x in modulenames]))
@@ -2109,24 +2192,24 @@ class RadianceObj:
         """
         if moduletype is not None:
             module = moduletype
-            print("Warning:  input `moduletype` is deprecated. Use kwarg "
-                  "`module` instead")
+            # print("Warning:  input `moduletype` is deprecated. Use kwarg "
+            # "`module` instead")
         if module is None:
             try:
                 module = self.module
-                print(f'Using last saved module, name: {module.name}')
+                # print(f'Using last saved module, name: {module.name}')
             except AttributeError:
                 print('makeScene(module, sceneDict, nMods, nRows).  ' + \
                       'Available moduletypes: ')
-                self.printModules()  # print available module types
+                self.printModules()  # # print available module types
                 return
         self.scene = SceneObj(module)
         self.scene.hpc = self.hpc  # pass HPC mode from parent
 
         if sceneDict is None:
             if not empty:
-                print('makeScene(moduletype, sceneDict, nMods, nRows).  ' + \
-                      'sceneDict inputs: .tilt .clearance_height .pitch .azimuth')
+                # print('makeScene(moduletype, sceneDict, nMods, nRows).  ' + \
+                #       'sceneDict inputs: .tilt .clearance_height .pitch .azimuth')
                 return self.scene
             else:
                 sceneDict = {}
@@ -2172,14 +2255,16 @@ class RadianceObj:
                 if sceneRAD not in self.radfiles:
                     self.radfiles.append(sceneRAD)
                     if debug:
-                        print("Radfile APPENDED!")
+                        pass
+                        # print("Radfile APPENDED!")
             except:
                 # TODO: Manage situation where radfile was created with
                 # appendRadfile to False first..
                 self.radfiles = []
                 self.radfiles.append(sceneRAD)
                 if debug:
-                    print("Radfile APPENDAGE created!")
+                    # print("Radfile APPENDAGE created!")
+                    pass
         else:
             self.radfiles = [sceneRAD]
         return self.scene
@@ -2210,10 +2295,6 @@ class RadianceObj:
 
         # py2 and 3 compatible: binary write, encode text first
         text2 = '\n' + text + ' ' + customObject
-
-        debug = False
-        if debug:
-            print(text2)
 
         with open(radfile, 'a+') as f:
             f.write(text2)
@@ -2253,9 +2334,9 @@ class RadianceObj:
         import math
 
         if sceneDict is None:
-            print('usage: makeScene1axis(module, sceneDict, nMods, nRows).' +
-                  'sceneDict inputs: .hub_height .azimuth .nMods .nRows' +
-                  'and .pitch or .gcr')
+            # # print('usage: makeScene1axis(module, sceneDict, nMods, nRows).' +
+            #       'sceneDict inputs: .hub_height .azimuth .nMods .nRows' +
+            #       'and .pitch or .gcr')
             return
 
         # If no nRows or nMods assigned on deprecated variable or dictionary,
@@ -2282,16 +2363,16 @@ class RadianceObj:
 
         if moduletype is not None:
             module = moduletype
-            print("Warning:  input `moduletype` is deprecated. Use kwarg "
-                  "`module` instead")
+            # # print("Warning:  input `moduletype` is deprecated. Use kwarg "
+            #       "`module` instead")
         if module is None:
             try:
                 module = self.module
-                print(f'Using last saved module, name: {module.name}')
+                # print(f'Using last saved module, name: {module.name}')
             except AttributeError:
                 print('usage:  makeScene1axis(trackerdict, module, ' +
                       'sceneDict, nMods, nRows). ')
-                self.printModules()  # print available module types
+                self.printModules()  # # print available module types
                 return
 
         if 'orientation' in sceneDict:
@@ -2318,7 +2399,7 @@ class RadianceObj:
             simplefix = 1
 
         if cumulativesky is True:  # cumulativesky workflow
-            print('\nMaking .rad files for cumulativesky 1-axis workflow')
+            # print('\nMaking .rad files for cumulativesky 1-axis workflow')
             for theta in trackerdict:
                 scene = SceneObj(module)
                 if trackerdict[theta]['surf_azm'] >= 180:
@@ -2356,10 +2437,10 @@ class RadianceObj:
                 trackerdict[theta]['radfile'] = radfile
                 trackerdict[theta]['scene'] = scene
 
-            print('{} Radfiles created in /objects/'.format(trackerdict.__len__()))
+            # print('{} Radfiles created in /objects/'.format(trackerdict.__len__()))
 
         else:  # gendaylit workflow
-            print('\nMaking ~%s .rad files for gendaylit 1-axis workflow (this takes a minute..)' % (len(trackerdict)))
+            # print('\nMaking ~%s .rad files for gendaylit 1-axis workflow (this takes a minute..)' % (len(trackerdict)))
             count = 0
             for time in trackerdict:
                 scene = SceneObj(module)
@@ -2400,7 +2481,7 @@ class RadianceObj:
                     trackerdict[time]['radfile'] = radfile
                     trackerdict[time]['scene'] = scene
                     count += 1
-            print('{} Radfiles created in /objects/'.format(count))
+            # print('{} Radfiles created in /objects/'.format(count))
 
         self.trackerdict = trackerdict
         # self.nMods = sceneDict['nMods']  #assign nMods and nRows to RadianceObj
@@ -2461,7 +2542,7 @@ class RadianceObj:
             this sets if the values passed to be updated are relative or absolute.
             Default is absolute value (relative=False)
         debug : Bool
-            Activates internal printing of the function to help debugging.
+            Activates internal # printing of the function to help debugging.
 
 
         Returns
@@ -2539,8 +2620,8 @@ class RadianceObj:
             else:
                 frontWm2 += np.array(analysis.Wm2Front)
                 backWm2 += np.array(analysis.Wm2Back)
-            print('Index: {}. Wm2Front: {}. Wm2Back: {}'.format(index,
-                                                                np.mean(analysis.Wm2Front), np.mean(analysis.Wm2Back)))
+            # print('Index: {}. Wm2Front: {}. Wm2Back: {}'.format(index,
+            # np.mean(analysis.Wm2Front), np.mean(analysis.Wm2Back)))
 
         if np.sum(self.Wm2Front) == 0:
             self.Wm2Front = frontWm2  # these are accumulated over all indices passed in.
@@ -2553,13 +2634,13 @@ class RadianceObj:
         # Save compiled results using _saveresults
         if singleindex is None:
 
-            print("Saving a cumulative-results file in the main simulation folder." +
-                  "This adds up by sensor location the irradiance over all hours " +
-                  "or configurations considered." +
-                  "\nWarning: This file saving routine does not clean results, so " +
-                  "if your setup has ygaps, or 2+modules or torque tubes, doing " +
-                  "a deeper cleaning and working with the individual results " +
-                  "files in the results folder is highly suggested.")
+            # # print("Saving a cumulative-results file in the main simulation folder." +
+            #       "This adds up by sensor location the irradiance over all hours " +
+            #       "or configurations considered." +
+            #       "\nWarning: This file saving routine does not clean results, so " +
+            #       "if your setup has ygaps, or 2+modules or torque tubes, doing " +
+            #       "a deeper cleaning and working with the individual results " +
+            #       "files in the results folder is highly suggested.")
             cumfilename = 'cumulative_results_%s.csv' % (customname)
             if self.cumulativesky is True:
                 frontcum = pd.DataFrame()
@@ -2577,7 +2658,7 @@ class RadianceObj:
                 rearcum['mattype'] = temptrackerdict.rearMat
                 rearcum['Wm2'] = self.Wm2Back
                 cumanalysisobj = AnalysisObj()
-                print("\nSaving Cumulative results")
+                # print("\nSaving Cumulative results")
                 cumanalysisobj._saveResultsCumulative(frontcum, rearcum, savefile=cumfilename)
             else:  # trackerkeys are day/hour/min, and there's no easy way to find a
                 # tilt of 0, so making a fake linepoint object for tilt 0
@@ -2609,7 +2690,7 @@ class RadianceObj:
                     rearcum['z'] = rearz
                     rearcum['mattype'] = trackerdict[trackerkeys[0]]['AnalysisObj'].rearMat
                     rearcum['Wm2'] = self.Wm2Back
-                    print("\nSaving Cumulative results")
+                    # print("\nSaving Cumulative results")
                     cumanalysisobj._saveResultsCumulative(frontcum, rearcum, savefile=cumfilename)
                 except:
                     print("Not able to save a cumulative result for this simulation.")
@@ -2638,7 +2719,7 @@ class GroundObj:
     material_file : str
         Filename of the material information. Default `ground.rad`
     silent       :  bool
-        suppress print statements. Default False
+        suppress # print statements. Default False
 
     Returns
     -------
@@ -2662,9 +2743,9 @@ class GroundObj:
 
         self.material_file = material_file
         if materialOrAlbedo is None:  # Case where it's none.
-            print('\nInput albedo 0-1, or string from ground.printGroundMaterials().'
-                  '\nAlternatively, run setGround after readWeatherData()'
-                  'and setGround will read metdata.albedo if available')
+            # # print('\nInput albedo 0-1, or string from ground.# printGroundMaterials().'
+            #       '\nAlternatively, run setGround after readWeatherData()'
+            #       'and setGround will read metdata.albedo if available')
             return
 
         if isinstance(materialOrAlbedo, str):
@@ -2704,8 +2785,9 @@ class GroundObj:
         # Check for invalid values
         if (materialOrAlbedo > 1).any() or (materialOrAlbedo < 0).any():
             if not silent:
-                print('Warning: albedo values greater than 1 or less than 0. '
-                      'Constraining to [0..1]')
+                # # print('Warning: albedo values greater than 1 or less than 0. '
+                #       'Constraining to [0..1]')
+                pass
             materialOrAlbedo = materialOrAlbedo.clip(min=0, max=1)
         try:
             self.Rrefl = materialOrAlbedo[:, 0]
@@ -2715,16 +2797,17 @@ class GroundObj:
                                     materialOrAlbedo[:, 2])
             self.ReflAvg = np.round(np.mean(materialOrAlbedo, axis=1), 4)
             if not silent:
-                print(f'Loading albedo, {self.ReflAvg.__len__()} value(s), '
-                      f'{self._nonzeromean(self.ReflAvg):0.3f} avg\n'
-                      f'{self.ReflAvg[self.ReflAvg != 0].__len__()} nonzero albedo values.')
+                # # print(f'Loading albedo, {self.ReflAvg.__len__()} value(s), '
+                #       f'{self._nonzeromean(self.ReflAvg):0.3f} avg\n'
+                #       f'{self.ReflAvg[self.ReflAvg != 0].__len__()} nonzero albedo values.')
+                pass
         except IndexError as e:
             print('albedo.shape should be 3 column (N x 3)')
             raise e
 
     def printGroundMaterials(self, materialString=None):
         """
-        printGroundMaterials(materialString=None)
+        # printGroundMaterials(materialString=None)
 
         input: None or materialString.  If None, return list of acceptable
         material types from ground.rad.  If valid string, return RGB albedo
@@ -2896,9 +2979,10 @@ class SceneObj:
             modulename = self.module.name
 
         if sceneDict is None:
-            print('makeScene(modulename, sceneDict, nMods, nRows).  sceneDict'
-                  ' inputs: .tilt .azimuth .nMods .nRows'
-                  ' AND .tilt or .gcr ; AND .hub_height or .clearance_height')
+            # # print('makeScene(modulename, sceneDict, nMods, nRows).  sceneDict'
+            #       ' inputs: .tilt .azimuth .nMods .nRows'
+            #       ' AND .tilt or .gcr ; AND .hub_height or .clearance_height')
+            pass
 
         if 'azimuth' not in sceneDict:
             sceneDict['azimuth'] = 180
@@ -3009,9 +3093,10 @@ class SceneObj:
             modulename = self.module.name
 
         if sceneDict is None:
-            print('makeScene(modulename, sceneDict, nMods, nRows).  sceneDict'
-                  ' inputs: .tilt .azimuth .nMods .nRows'
-                  ' AND .tilt or .gcr ; AND .hub_height or .clearance_height')
+            # # print('makeScene(modulename, sceneDict, nMods, nRows).  sceneDict'
+            #       ' inputs: .tilt .azimuth .nMods .nRows'
+            #       ' AND .tilt or .gcr ; AND .hub_height or .clearance_height')
+            pass
 
         if 'orientation' in sceneDict:
             raise Exception('\n\n ERROR: Orientation format has been '
@@ -3094,11 +3179,11 @@ class SceneObj:
 
         # axis tilt only working for N-S trackers
         if axis_tilt != 0 and azimuth == 90:
-            print("Axis_Tilt is still under development. The scene will be "
-                  "created with the proper axis tilt, and the tracking angle"
-                  "will consider the axis_tilt, but the sensors for the "
-                  "analysis might not fall in the correct surfaces unless you"
-                  " manually position them for this version. Sorry! :D ")
+            # print("Axis_Tilt is still under development. The scene will be "
+            #   "created with the proper axis tilt, and the tracking angle"
+            #   "will consider the axis_tilt, but the sensors for the "
+            #   "analysis might not fall in the correct surfaces unless you"
+            #   " manually position them for this version. Sorry! :D ")
 
             text += (f'-rx {axis_tilt} -t 0 0 %s ' % (
                     self.module.scenex * (round(nMods / 1.99) * 1.0 - 1) * np.sin(
@@ -3132,13 +3217,13 @@ class SceneObj:
         """
         cmd = 'objview %s %s' % (os.path.join('materials', 'ground.rad'),
                                  self.radfiles)
-        print('Rendering scene. This may take a moment...')
+        # print('Rendering scene. This may take a moment...')
         _, err = _popen(cmd, None)
         if err is not None:
             print('Error: {}'.format(err))
-            print('possible solution: install radwinexe binary package from '
-                  'http://www.jaloxa.eu/resources/radiance/radwinexe.shtml'
-                  ' into your RADIANCE binaries path')
+            # print('possible solution: install radwinexe binary package from '
+            #   'http://www.jaloxa.eu/resources/radiance/radwinexe.shtml'
+            #   ' into your RADIANCE binaries path')
             return
 
     def saveImage(self, filename=None, view=None):
@@ -3243,7 +3328,11 @@ class MetObj:
         try:
             self.city = metadata['Name']  # readepw version
         except KeyError:
-            self.city = metadata['city']  # pvlib version
+            try:
+                self.city = metadata['city']  # pvlib version
+            except KeyError:
+                self.city = None
+
         # self.location.state_province_region = metadata['State'] # unecessary
         self.datetime = tmydata.index.tolist()  # this is tz-aware.
         self.ghi = np.array(tmydata.GHI)
@@ -3305,11 +3394,11 @@ class MetObj:
             interval = datetimetz[1] - datetimetz[0]
         except IndexError:
             interval = pd.Timedelta('1h')  # ISSUE: if 1 datapoint is passed, are we sure it's hourly data?
-            print("WARNING: TMY interval was unable to be defined, so setting it to 1h.")
+            # print("WARNING: TMY interval was unable to be defined, so setting it to 1h.")
         # TODO:  Refactor this into a subfunction. first calculate minutedelta
         # based on label and interval (-30, 0, +30, +7.5 etc) then correct all.
         if label.lower() == 'center':
-            print("Calculating Sun position for center labeled data, at exact timestamp in input Weather File")
+            # print("Calculating Sun position for center labeled data, at exact timestamp in input Weather File")
             sunup = pvlib.irradiance.solarposition.sun_rise_set_transit_spa(datetimetz, lat,
                                                                             lon)  # new for pvlib >= 0.6.1
             sunup['corrected_timestamp'] = datetimetz
@@ -3317,8 +3406,8 @@ class MetObj:
             if interval == pd.Timedelta('1h'):
 
                 if label.lower() == 'right':
-                    print("Calculating Sun position for Metdata that is right-labeled ",
-                          "with a delta of -30 mins. i.e. 12 is 11:30 sunpos")
+                    # print("Calculating Sun position for Metdata that is right-labeled ",
+                    #   "with a delta of -30 mins. i.e. 12 is 11:30 sunpos")
                     sunup = pvlib.irradiance.solarposition.sun_rise_set_transit_spa(datetimetz, lat,
                                                                                     lon)  # new for pvlib >= 0.6.1
                     sunup['minutedelta'] = int(
@@ -3335,8 +3424,8 @@ class MetObj:
                     sunup['corrected_timestamp'] = sunup.index - pd.to_timedelta(sunup['minutedelta'], unit='m')
 
                 elif label.lower() == 'left':
-                    print("Calculating Sun position for Metdata that is left-labeled ",
-                          "with a delta of +30 mins. i.e. 12 is 12:30 sunpos.")
+                    # print("Calculating Sun position for Metdata that is left-labeled ",
+                    # "with a delta of +30 mins. i.e. 12 is 12:30 sunpos.")
                     sunup = pvlib.irradiance.solarposition.sun_rise_set_transit_spa(datetimetz, lat, lon)
                     sunup['minutedelta'] = int(
                         interval.seconds / 2 / 60)  # default sun angle 30 minutes after timestamp
@@ -3352,10 +3441,10 @@ class MetObj:
                     raise ValueError('Error: invalid weather label passed. Valid inputs: right, left or center')
             else:
                 minutedelta = int(interval.seconds / 2 / 60)
-                print("Interval in weather data is less than 1 hr, calculating"
-                      f" Sun position with a delta of -{minutedelta} minutes.")
-                print("If you want no delta for sunposition, use "
-                      "readWeatherFile( label='center').")
+                # print("Interval in weather data is less than 1 hr, calculating"
+                # f" Sun position with a delta of -{minutedelta} minutes.")
+                # print("If you want no delta for sunposition, use "
+                # "readWeatherFile( label='center').")
                 # datetimetz=datetimetz-pd.Timedelta(minutes = minutedelta)   # This doesn't check for Sunrise or Sunset
                 # sunup= pvlib.irradiance.solarposition.get_sun_rise_set_transit(datetimetz, lat, lon) # deprecated in pvlib 0.6.1
                 sunup = pvlib.irradiance.solarposition.sun_rise_set_transit_spa(datetimetz, lat,
@@ -3431,13 +3520,14 @@ class MetObj:
         # get 1-axis tracker angles for this location,
         # round to nearest 'angledelta'
         if self.meastracker_angle is not None and useMeasuredTrackerAngle is True:
-            print("Tracking Data: Reading from provided Tracker Angles")
+            # print("Tracking Data: Reading from provided Tracker Angles")
+            pass
         elif self.meastracker_angle is None and useMeasuredTrackerAngle is True:
             useMeasuredTrackerAngle = False
-            print("Warning: Using Measured Tracker Angles was specified but DATA" +
-                  " for trackers has not yet been assigned. " +
-                  " Assign it by making it a column on your Weatherdata File " +
-                  "named 'Tracker Angle (degrees)' and run ReadWeatherFile again")
+            # print("Warning: Using Measured Tracker Angles was specified but DATA" +
+            #   " for trackers has not yet been assigned. " +
+            #   " Assign it by making it a column on your Weatherdata File " +
+            #   "named 'Tracker Angle (degrees)' and run ReadWeatherFile again")
 
         trackingdata = self._getTrackingAngles(azimuth,
                                                limit_angle,
@@ -3649,8 +3739,8 @@ class MetObj:
             # Fill partial year. Requires 2021 measurement year.
             savedata = _subhourlydatatoGencumskyformat(savedata,
                                                        label=self.label)
-            print('Saving file {}, # points: {}'.format(
-                trackerdict[theta]['csvfile'], datetimetemp.__len__()))
+            # print('Saving file {}, # points: {}'.format(
+            # trackerdict[theta]['csvfile'], datetimetemp.__len__()))
 
             savedata.to_csv(csvfile,
                             index=False,
@@ -3711,7 +3801,7 @@ class AnalysisObj:
                     time_counter += 1
                     if time_counter > time_to_wait: break
 
-        print('Generating visible render of scene')
+        # print('Generating visible render of scene')
         # TODO: update this for cross-platform compatibility w os.path.join
         os.system("rpict -dp 256 -ar 48 -ms 1 -ds .2 -dj .9 -dt .1 " +
                   "-dc .5 -dr 1 -ss 1 -st .1 -ab 3  -aa .1 " +
@@ -3735,7 +3825,7 @@ class AnalysisObj:
         if name is None:
             name = self.name
 
-        print('Generating scene in WM-2. This may take some time.')
+        # print('Generating scene in WM-2. This may take some time.')
         # TODO: update and test this for cross-platform compatibility using os.path.join
         cmd = "rpict -i -dp 256 -ar 48 -ms 1 -ds .2 -dj .9 -dt .1 " + \
               "-dc .5 -dr 1 -ss 1 -st .1 -ab 3  -aa .1 -ad 1536 -as 392 " + \
@@ -3750,7 +3840,7 @@ class AnalysisObj:
         extrm_out, err = _popen("pextrem", WM2_out.encode('latin1'))
         # cast the pextrem string as a float and find the max value
         WM2max = max(map(float, extrm_out.split()))
-        print('Saving scene in false color')
+        # print('Saving scene in false color')
         # auto scale false color map
         if WM2max < 1100:
             cmd = "falsecolor -l W/m2 -m 1 -s 1100 -n 11"
@@ -3760,12 +3850,12 @@ class AnalysisObj:
             data, err = _popen(cmd, WM2_out.encode('latin1'), f)
             if err is not None:
                 print(err)
-                print('possible solution: install radwinexe binary package from '
-                      'http://www.jaloxa.eu/resources/radiance/radwinexe.shtml')
+                # print('possible solution: install radwinexe binary package from '
+                # 'http://www.jaloxa.eu/resources/radiance/radwinexe.shtml')
 
     def _linePtsArray(self, linePtsDict):
         """
-        Helper function to just print the x y and z values in an array format,
+        Helper function to just # print the x y and z values in an array format,
         just like they will show in the .csv result files.
 
         """
@@ -3871,11 +3961,11 @@ class AnalysisObj:
                 time.sleep(1)
                 time_counter += 1
                 if time_counter > time_to_wait:
-                    print('Warning: OCTFILE NOT FOUND')
+                    # print('Warning: OCTFILE NOT FOUND')
                     break
 
         if octfile is None:
-            print('Analysis aborted. octfile = None')
+            # print('Analysis aborted. octfile = None')
             return None
 
         keys = ['Wm2', 'x', 'y', 'z', 'r', 'g', 'b', 'mattype']
@@ -3893,7 +3983,7 @@ class AnalysisObj:
             # rtrace ambient values set for 'very accurate':
             cmd = "rtrace -i -ab 5 -aa .08 -ar 512 -ad 2048 -as 512 -h -oovs " + octfile
         else:
-            print('_irrPlot accuracy options: "low" or "high"')
+            # print('_irrPlot accuracy options: "low" or "high"')
             return ({})
 
         temp_out, err = _popen(cmd, linepts.encode())
@@ -3903,7 +3993,7 @@ class AnalysisObj:
             else:
                 print(err)
 
-        # when file errors occur, temp_out is None, and err message is printed.
+        # when file errors occur, temp_out is None, and err message is # printed.
         if temp_out is not None:
             for line in temp_out.splitlines():
                 temp = line.split('\t')
@@ -3987,7 +4077,7 @@ class AnalysisObj:
         df.to_csv(os.path.join("results", savefile), sep=',',
                   index=False)
 
-        print('Saved: %s' % (os.path.join("results", savefile)))
+        # print('Saved: %s' % (os.path.join("results", savefile)))
         return os.path.join("results", savefile)
 
     def _saveResultsCumulative(self, data, reardata=None, savefile=None):
@@ -4036,7 +4126,7 @@ class AnalysisObj:
             df.to_csv(savefile, sep=',',
                       columns=['x', 'y', 'z', 'mattype', 'Wm2'], index=False)
 
-        print('Saved: %s' % (savefile))
+        # print('Saved: %s' % (savefile))
         return (savefile)
 
     def singleModuleAnalysis(self, scene, sensorsy=9, sensorsx=1,
@@ -4090,7 +4180,7 @@ class AnalysisObj:
             If multiple values are passed, first value represents number of
             front sensors, second value is number of back sensors.
         debug : bool
-            Activates various print statemetns for debugging this function.
+            Activates various # print statemetns for debugging this function.
         modscanfront : dict
             Dictionary to modify the fronstcan values established by this routine
             and set a specific value. Keys possible are 'xstart', 'ystart', 'zstart',
@@ -4144,7 +4234,7 @@ class AnalysisObj:
                     raise Exception('input sensorsy must be numeric >0')
                 sensors_back = sensors_front = int(sensors)
             else:
-                print('Warning: invalid value passed for sensors. Setting = 1')
+                # print('Warning: invalid value passed for sensors. Setting = 1')
                 sensors_back = sensors_front = 1
             return sensors_front, sensors_back
 
@@ -4192,7 +4282,7 @@ class AnalysisObj:
         if hasattr(scene.module, 'z'):
             modulez = scene.module.z
         else:
-            print("Module's z not set on sceneDict internal dictionary. Setting to default")
+            # print("Module's z not set on sceneDict internal dictionary. Setting to default")
             modulez = 0.02
 
         if frontsurfaceoffset is None:
@@ -4215,20 +4305,14 @@ class AnalysisObj:
         else:
             height = sceneDict['hub_height']
 
-        if debug:
-            print("For debug:\n hub_height, Azimuth, Tilt, nMods, nRows, "
-                  "Pitch, Offset, SceneY, SceneX")
-            print(height, azimuth, tilt, nMods, nRows,
-                  pitch, offset, sceney, scenex)
-
         if modWanted == 0:
-            print(" FYI Modules and Rows start at index 1. "
-                  "Reindexing to modWanted 1")
+            # print(" FYI Modules and Rows start at index 1. "
+            # "Reindexing to modWanted 1")
             modWanted = modWanted + 1  # otherwise it gives results on Space.
 
         if rowWanted == 0:
-            print(" FYI Modules and Rows start at index 1. "
-                  "Reindexing to rowWanted 1")
+            # print(" FYI Modules and Rows start at index 1. "
+            # "Reindexing to rowWanted 1")
             rowWanted = rowWanted + 1
 
         if modWanted is None:
@@ -4237,8 +4321,9 @@ class AnalysisObj:
             rowWanted = round(nRows / 1.99)
 
         if debug is True:
-            print(f"Sampling: modWanted {modWanted}, rowWanted {rowWanted} "
-                  "out of {nMods} modules, {nRows} rows")
+            # print(f"Sampling: modWanted {modWanted}, rowWanted {rowWanted} "
+            # "out of {nMods} modules, {nRows} rows")
+            pass
 
         x0 = (modWanted - 1) * scenex - (scenex * (round(nMods / 1.99) * 1.0 - 1))
         y0 = (rowWanted - 1) * pitch - (pitch * (round(nRows / 1.99) * 1.0 - 1))
@@ -4248,7 +4333,7 @@ class AnalysisObj:
         z1 = 0
 
         if axis_tilt != 0 and azimuth == 90:
-            print("fixing height for axis_tilt")
+            # print("fixing height for axis_tilt")
             z1 = (modWanted - 1) * scenex * np.sin(axis_tilt * dtor)
 
         # Edge of Panel
@@ -4313,9 +4398,10 @@ class AnalysisObj:
             sx_zinc_back = 0.0
 
             if (sensorsx_back != 1.0):
-                print("Warning: Cell-level module analysis for sensorsx > 1 not " +
-                      "fine-tuned yet. Use at own risk, some of the x positions " +
-                      "might fall in spacing between cells.")
+                # print("Warning: Cell-level module analysis for sensorsx > 1 not " +
+                #   "fine-tuned yet. Use at own risk, some of the x positions " +
+                #   "might fall in spacing between cells.")
+                pass
         else:
             xinc_back = -(sceney / (sensorsy_back + 1.0)) * np.cos((tilt) * dtor) * np.sin((azimuth) * dtor)
             yinc_back = -(sceney / (sensorsy_back + 1.0)) * np.cos((tilt) * dtor) * np.cos((azimuth) * dtor)
@@ -4376,13 +4462,14 @@ class AnalysisObj:
                 sx_zinc_front = 0.0
 
         if debug is True:
-            print("Azimuth", azimuth)
-            print("Coordinate Center Point of Desired Panel before azm rotation", x0, y0)
-            print("Coordinate Center Point of Desired Panel after azm rotation", x1, y1)
-            print("Edge of Panel", x2, y2, z2)
-            print("Offset Shift", x3, y3, z3)
-            print("Final Start Coordinate Front", xstartfront, ystartfront, zstartfront)
-            print("Increase Coordinates", xinc_front, yinc_front, zinc_front)
+            # print("Azimuth", azimuth)
+            # print("Coordinate Center Point of Desired Panel before azm rotation", x0, y0)
+            # print("Coordinate Center Point of Desired Panel after azm rotation", x1, y1)
+            # print("Edge of Panel", x2, y2, z2)
+            # print("Offset Shift", x3, y3, z3)
+            # print("Final Start Coordinate Front", xstartfront, ystartfront, zstartfront)
+            # print("Increase Coordinates", xinc_front, yinc_front, zinc_front)
+            pass
 
         frontscan = {'xstart': firstsensorxstartfront, 'ystart': firstsensorystartfront,
                      'zstart': firstsensorzstartfront,
@@ -4610,27 +4697,27 @@ class AnalysisObj:
         """
 
         if octfile is None:
-            print('Analysis aborted - no octfile \n')
+            # print('Analysis aborted - no octfile \n')
             return None, None
 
         if deepblusky and front_points is not None:
             linepts = front_points
-            # print("front points: ", linepts)
+            # # print("front points: ", linepts)
         else:
             linepts = self._linePtsMakeDict(frontscan)
         frontDict = self._irrPlot(octfile, linepts, name + '_Front',
                                   plotflag=plotflag, accuracy=accuracy)
-        # print("frontDict: ", frontDict)
+        # # print("frontDict: ", frontDict)
 
         # bottom view.
         if deepblusky and back_points is not None:
             linepts = back_points
-            # print("back points: ", linepts)
+            # # print("back points: ", linepts)
         else:
             linepts = self._linePtsMakeDict(backscan)
         backDict = self._irrPlot(octfile, linepts, name + '_Back',
                                  plotflag=plotflag, accuracy=accuracy)
-        # print("backDict: ", backDict)
+        # # print("backDict: ", backDict)
 
         # don't save if _irrPlot returns an empty file.
         if frontDict is not None:
@@ -4693,8 +4780,8 @@ def quickExample(testfolder=None):
     frontscan, backscan = analysis.moduleAnalysis(scene, sensorsy=9)
     analysis.analysis(octfile, demo.name, frontscan, backscan, accuracy='low')
     # bifacial ratio should be 11.6% +/- 0.1% (+/- 1% absolute with glass-glass module)
-    print('Annual bifacial ratio average:  %0.3f' % (
-            sum(analysis.Wm2Back) / sum(analysis.Wm2Front)))
+    # print('Annual bifacial ratio average:  %0.3f' % (
+    # sum(analysis.Wm2Back) / sum(analysis.Wm2Front)))
 
     return analysis
 
