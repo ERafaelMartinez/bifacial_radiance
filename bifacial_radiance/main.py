@@ -2163,6 +2163,15 @@ class RadianceObj:
         print('Available module names: {}'.format([str(x) for x in modulenames]))
         return modulenames
 
+    def makeDeepBluSkyScene(self, module, dbsSceneDict, radname=None, overwrite_radfile=False):
+        """"""
+        self.scene = SceneObj(module)
+        sceneRAD = self.scene._makeDeepBluSkySingleModuleScene(dbsSceneDict=dbsSceneDict, radname=radname,
+                                                               overwrite_radfile=overwrite_radfile)
+        self._addRadfile(sceneRAD=sceneRAD, append=dbsSceneDict.get('appendRadfile', False))
+
+        return self.scene
+
     def makeScene(self, module=None, sceneDict=None, radname=None, empty=False,
                   moduletype=None, single_module=False, orientation_deg=None, overwrite_radfile=False):
         """
@@ -2243,33 +2252,25 @@ class RadianceObj:
         else:
             sceneRAD = self.scene._makeSceneNxR(sceneDict=sceneDict, radname=radname)
 
-        if 'appendRadfile' not in sceneDict:
-            appendRadfile = False
-        else:
-            appendRadfile = sceneDict['appendRadfile']
+        self._addRadfile(sceneRAD=sceneRAD, append=sceneDict.get('appendRadfile', False))
 
-        if appendRadfile:
-            debug = False
+        return self.scene
+
+    def _addRadfile(self, sceneRAD, append: bool):
+        if append:
             try:
                 # check if the sceneRAD string is already in the radfiles list
                 if sceneRAD not in self.radfiles:
                     self.radfiles.append(sceneRAD)
-                    if debug:
-                        pass
-                        # print("Radfile APPENDED!")
             except:
                 # TODO: Manage situation where radfile was created with
                 # appendRadfile to False first..
                 self.radfiles = []
                 self.radfiles.append(sceneRAD)
-                if debug:
-                    # print("Radfile APPENDAGE created!")
-                    pass
         else:
             self.radfiles = [sceneRAD]
-        return self.scene
 
-    def appendtoScene(self, radfile=None, customObject=None, text=''):
+    def appendtoScene(self, radfile=None, customObject=None, text='', scene_empty=False):
         """
         Appends to the `Scene radfile` in folder `\objects` the text command in Radiance
         lingo created by the user.
@@ -2294,7 +2295,12 @@ class RadianceObj:
         # TODO: Add a custom name and replace radfile name
 
         # py2 and 3 compatible: binary write, encode text first
-        text2 = '\n' + text + ' ' + customObject
+        if not scene_empty:
+            text
+
+        text2 = '\n' + text
+        if customObject is not None:
+            text2 += ' ' + customObject
 
         with open(radfile, 'a+') as f:
             f.write(text2)
@@ -2970,6 +2976,57 @@ class SceneObj:
 
         return radfile
 
+    def _makeDeepBluSkySingleModuleScene(self, modulename=None, dbsSceneDict=None, radname=None,
+                                         overwrite_radfile=False):
+        """"""
+        modulename = modulename if modulename is not None else self.module.name
+        radname = radname if radname is not None else str(self.module.name).strip().replace(' ', '_')
+
+        # module variables
+        module_tilt = dbsSceneDict['module_tilt_deg']
+        module_azimuth = dbsSceneDict['module_azimuth_deg']
+
+        module_origin_x = dbsSceneDict['module_origin_x']
+        module_origin_y = dbsSceneDict['module_origin_y']
+        module_origin_z = dbsSceneDict['module_origin_z']
+
+        # structure parameters
+        structure_azimuth = dbsSceneDict['structure_azimuth_deg']
+
+        ''' INITIALIZE VARIABLES '''
+        text = "!xform "  # function that starts the transformation
+
+        # rotate about x-axis to tilt the module
+        text += f"-rx {module_tilt} "
+
+        # rotate about z-axis to orient the module
+        text += f"-rz {-(module_azimuth - 180)} "
+
+        # rotate about z-axis to orient the module with respect to the structure
+        # text += f"-rz {structure_azimuth} "
+
+        # translate to origin
+        text += f" -t {module_origin_x} {module_origin_y} {module_origin_z} "
+
+        filename = (f"{radname}.rad")
+
+        text += os.path.join(self.modulefile)
+        radfile = os.path.join('objects', filename)
+
+        if overwrite_radfile:
+            with open(radfile, 'wb') as f:
+                f.write(text.encode('ascii'))
+        else:
+            with open(radfile, 'ab') as f:
+                text = '\n' + text
+                f.write(text.encode('ascii'))
+
+        self.text = text
+        self.radfiles = radfile
+        self.sceneDict = dbsSceneDict
+
+        return radfile
+
     def _makeSceneSingleModule(self, modulename=None, sceneDict=None, radname=None, orientation_deg=None,
                                overwrite_radfile=False):
         """
@@ -3306,7 +3363,7 @@ class MetObj:
 
     """
 
-    def __init__(self, tmydata, metadata, label='right'):
+    def __init__(self, tmydata, metadata, label='right', prune_neg_ghi=True):
 
         import pytz
         import pvlib
@@ -3314,7 +3371,8 @@ class MetObj:
 
         # First prune all GHI = 0 timepoints.  New as of 0.4.0
         # TODO: is this a good idea?  This changes default behavior...
-        tmydata = tmydata[tmydata.GHI > 0]
+        if prune_neg_ghi:
+            tmydata = tmydata[tmydata.GHI > 0]
 
         #  location data.  so far needed:
         # latitude, longitude, elevation, timezone, city
@@ -3916,7 +3974,7 @@ class AnalysisObj:
         return (linepts)
 
     def _irrPlot(self, octfile, linepts, mytitle=None, plotflag=None,
-                 accuracy='low'):
+                 accuracy='low', surface: bool = True):
         """
         (plotdict) = _irrPlot(linepts,title,time,plotflag, accuracy)
         irradiance plotting using rtrace
@@ -3953,6 +4011,11 @@ class AnalysisObj:
         if plotflag is None:
             plotflag = False
 
+        if surface:
+            irr = "i"
+        else:
+            irr = "I"
+
         if self.hpc:
             import time
             time_to_wait = 10
@@ -3978,10 +4041,12 @@ class AnalysisObj:
 
         if accuracy == 'low':
             # rtrace optimized for faster scans: (ab2, others 96 is too coarse)
-            cmd = "rtrace -i -ab 3 -aa .1 -ar 256 -ad 2048 -as 256 -h -oovs " + octfile
+            cmd = f"rtrace -{irr} -ab 3 -aa .1 -ar 256 -ad 2048 -as 256 -h -oovs " + octfile
+        elif accuracy == 'medium':
+            cmd = f"rtrace -{irr} -ab 3 -aa .09 -ar 384 -ad 2048 -as 384 -h -oovs " + octfile
         elif accuracy == 'high':
             # rtrace ambient values set for 'very accurate':
-            cmd = "rtrace -i -ab 5 -aa .08 -ar 512 -ad 2048 -as 512 -h -oovs " + octfile
+            cmd = f"rtrace -{irr} -ab 5 -aa .08 -ar 512 -ad 2048 -as 512 -h -oovs " + octfile
         else:
             # print('_irrPlot accuracy options: "low" or "high"')
             return ({})
@@ -4629,22 +4694,29 @@ class AnalysisObj:
         points = np.array(np.meshgrid(x, y, z)).T.reshape(-1, 3)
 
         # rotate the points around the x axis by the tilt angle
-        tilt = scene.sceneDict["tilt"]
+        tilt = scene.sceneDict["module_tilt_deg"]
         points = rotate(points, angle=np.deg2rad(tilt), axis="x")
         normal_vector = rotate(np.array([normal_vector]), angle=np.deg2rad(tilt), axis="x")[0]
 
         # rotate the points around the z axis by the azimuth angle
-        azimuth = scene.sceneDict["azimuth"]
+        azimuth = scene.sceneDict["module_azimuth_deg"]
         points = rotate(points, angle=np.deg2rad(azimuth), axis="z")
         normal_vector = rotate(np.array([normal_vector]), angle=np.deg2rad(azimuth), axis="z")[0]
 
         # translate the points to the origin of the scene
         points = translate(
             points,
-            shift_x=scene.sceneDict["originx"],
-            shift_y=scene.sceneDict["originy"],
-            shift_z=scene.sceneDict["clearance_height"]
+            shift_x=scene.sceneDict["module_origin_x"],
+            shift_y=scene.sceneDict["module_origin_y"],
+            shift_z=scene.sceneDict["module_origin_z"]
         )
+
+        # rotate the points around the z axis by the azimuth angle of the structure
+        azimuth = scene.sceneDict["structure_azimuth_deg"]
+        points = rotate(points, angle=np.deg2rad(azimuth), axis="z")
+        normal_vector = rotate(np.array([normal_vector]), angle=np.deg2rad(azimuth), axis="z")[0]
+
+        # TODO: rotate the points around the x axis by the tilt angle of the terrain
 
         # write the points to a string for its further use
         linepts = ""
@@ -4660,7 +4732,7 @@ class AnalysisObj:
         return linepts
 
     def analysis(self, octfile, name, frontscan=None, backscan=None,
-                 plotflag=False, accuracy='low', RGB=False,
+                 plotflag=False, accuracy='low', RGB=False, surface: bool = False,
                  deepblusky=False, front_points=None, back_points=None):
         """
         General analysis function, where linepts are passed in for calling the
@@ -4706,7 +4778,8 @@ class AnalysisObj:
         else:
             linepts = self._linePtsMakeDict(frontscan)
         frontDict = self._irrPlot(octfile, linepts, name + '_Front',
-                                  plotflag=plotflag, accuracy=accuracy)
+                                  plotflag=plotflag, accuracy=accuracy,
+                                  surface=surface)
         # # print("frontDict: ", frontDict)
 
         # bottom view.
@@ -4716,7 +4789,8 @@ class AnalysisObj:
         else:
             linepts = self._linePtsMakeDict(backscan)
         backDict = self._irrPlot(octfile, linepts, name + '_Back',
-                                 plotflag=plotflag, accuracy=accuracy)
+                                 plotflag=plotflag, accuracy=accuracy,
+                                 surface=surface)
         # # print("backDict: ", backDict)
 
         # don't save if _irrPlot returns an empty file.
