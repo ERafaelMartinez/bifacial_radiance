@@ -4774,23 +4774,30 @@ class AnalysisObj:
 
         if deepblusky and front_points is not None:
             linepts = front_points
-            # # print("front points: ", linepts)
+            _name = name if back_points is None else name + '_Front'
+            frontDict = self._irrPlot(octfile, linepts, _name,
+                                      plotflag=plotflag, accuracy=accuracy,
+                                      surface=surface)
         else:
             linepts = self._linePtsMakeDict(frontscan)
-        frontDict = self._irrPlot(octfile, linepts, name + '_Front',
-                                  plotflag=plotflag, accuracy=accuracy,
-                                  surface=surface)
+            frontDict = self._irrPlot(octfile, linepts, name + '_Front',
+                                    plotflag=plotflag, accuracy=accuracy,
+                                    surface=surface)
         # # print("frontDict: ", frontDict)
 
         # bottom view.
         if deepblusky and back_points is not None:
             linepts = back_points
-            # # print("back points: ", linepts)
+            backDict = self._irrPlot(octfile, linepts, name + '_Back',
+                                     plotflag=plotflag, accuracy=accuracy,
+                                     surface=surface)
+        elif deepblusky:
+            backDict = {'Wm2': [0]}
         else:
             linepts = self._linePtsMakeDict(backscan)
-        backDict = self._irrPlot(octfile, linepts, name + '_Back',
-                                 plotflag=plotflag, accuracy=accuracy,
-                                 surface=surface)
+            backDict = self._irrPlot(octfile, linepts, name + '_Back',
+                                    plotflag=plotflag, accuracy=accuracy,
+                                    surface=surface)
         # # print("backDict: ", backDict)
 
         # don't save if _irrPlot returns an empty file.
@@ -4799,8 +4806,13 @@ class AnalysisObj:
                 self.Wm2Front = np.mean(frontDict['Wm2'])
                 self.Wm2Back = np.mean(backDict['Wm2'])
                 self.backRatio = self.Wm2Back / (self.Wm2Front + .001)
-                self._saveResults(frontDict, reardata=None, savefile='irr_%s.csv' % (name + '_Front'), RGB=RGB)
-                self._saveResults(data=None, reardata=backDict, savefile='irr_%s.csv' % (name + '_Back'), RGB=RGB)
+                if deepblusky:
+                    self._saveResults(frontDict, reardata=None, savefile='irr_%s.csv' % (name), RGB=RGB)
+                    if back_points is not None:
+                        self._saveResults(data=None, reardata=backDict, savefile='irr_%s.csv' % (name + '_Back'), RGB=RGB)
+                else:
+                    self._saveResults(frontDict, reardata=None, savefile='irr_%s.csv' % (name + '_Front'), RGB=RGB)
+                    self._saveResults(data=None, reardata=backDict, savefile='irr_%s.csv' % (name + '_Back'), RGB=RGB)
             else:
                 self._saveResults(frontDict, backDict, 'irr_%s.csv' % (name), RGB=RGB)
 
