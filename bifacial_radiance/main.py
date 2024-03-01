@@ -4031,7 +4031,7 @@ class AnalysisObj:
             # print('Analysis aborted. octfile = None')
             return None
 
-        keys = ['Wm2', 'x', 'y', 'z', 'r', 'g', 'b', 'mattype']
+        keys = ['Wm2', 'x', 'y', 'z', 'dx', 'dy', 'dz', 'r', 'g', 'b', 'mattype']
         out = {key: [] for key in keys}
         # out = dict.fromkeys(['Wm2','x','y','z','r','g','b','mattype','title'])
         out['title'] = mytitle
@@ -4041,12 +4041,12 @@ class AnalysisObj:
 
         if accuracy == 'low':
             # rtrace optimized for faster scans: (ab2, others 96 is too coarse)
-            cmd = f"rtrace -{irr} -ab 3 -aa .1 -ar 256 -ad 2048 -as 256 -h -oovs " + octfile
+            cmd = f"rtrace -{irr} -ab 3 -aa .1 -ar 256 -ad 2048 -as 256 -h -oodvs " + octfile
         elif accuracy == 'medium':
-            cmd = f"rtrace -{irr} -ab 3 -aa .09 -ar 384 -ad 2048 -as 384 -h -oovs " + octfile
+            cmd = f"rtrace -{irr} -ab 3 -aa .09 -ar 384 -ad 2048 -as 384 -h -oodvs " + octfile
         elif accuracy == 'high':
             # rtrace ambient values set for 'very accurate':
-            cmd = f"rtrace -{irr} -ab 5 -aa .08 -ar 512 -ad 2048 -as 512 -h -oovs " + octfile
+            cmd = f"rtrace -{irr} -ab 5 -aa .08 -ar 512 -ad 2048 -as 512 -h -oodvs " + octfile
         else:
             # print('_irrPlot accuracy options: "low" or "high"')
             return ({})
@@ -4065,11 +4065,15 @@ class AnalysisObj:
                 out['x'].append(float(temp[0]))
                 out['y'].append(float(temp[1]))
                 out['z'].append(float(temp[2]))
-                out['r'].append(float(temp[3]))
-                out['g'].append(float(temp[4]))
-                out['b'].append(float(temp[5]))
-                out['mattype'].append(temp[6])
-                out['Wm2'].append(sum([float(i) for i in temp[3:6]]) / 3.0)
+                out['dx'].append(float(temp[3]))
+                out['dy'].append(float(temp[4]))
+                out['dz'].append(float(temp[5]))
+                out['r'].append(float(temp[6]))
+                out['g'].append(float(temp[7]))
+                out['b'].append(float(temp[8]))
+                out['mattype'].append(temp[9])
+                out['Wm2'].append(sum([float(i) for i in temp[6:9]]) / 3.0)
+
 
             if plotflag is True:
                 import matplotlib.pyplot as plt
@@ -4110,9 +4114,11 @@ class AnalysisObj:
         # make savefile dataframe and set self.attributes
 
         if RGB:
-            data_sub = {key: data[key] for key in ['x', 'y', 'z', 'mattype', 'Wm2', 'r', 'g', 'b']}
+            data_sub = {key: data[key] for key in ['x', 'y', 'z', 'dx', 'dy', 'dz',
+                                                   'mattype', 'Wm2', 'r', 'g', 'b']}
         else:
-            data_sub = {key: data[key] for key in ['x', 'y', 'z', 'mattype', 'Wm2']}
+            data_sub = {key: data[key] for key in ['x', 'y', 'z', 'dx', 'dy', 'dz',
+                                                   'mattype', 'Wm2']}
 
         df = pd.DataFrame(data_sub)
         df = df.rename(columns={'Wm2': 'Wm2Front'})
